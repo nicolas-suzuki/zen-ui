@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HA Calendar Heatmap Demo</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        background-color: #f0f0f0;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      body.dark {
+        background-color: #0d1117;
+        color: #c9d1d9;
+      }
+
+      h1 {
+        margin-bottom: 20px;
+      }
+
+      #controls {
+        margin-bottom: 20px;
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 800px;
+      }
+
+      body.dark #controls {
+        background: #161b22;
+        border: 1px solid #30363d;
+      }
+
+      .control-group {
+        margin-bottom: 10px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+
+      textarea {
+        width: 100%;
+        height: 100px;
+        font-family: monospace;
+      }
+
+      button {
+        padding: 8px 16px;
+        cursor: pointer;
+        background-color: #0969da;
+        color: white;
+        border: none;
+        border-radius: 6px;
+      }
+
+      button:hover {
+        background-color: #035fc7;
+      }
+
+      button.secondary {
+        background-color: #eee;
+        color: #333;
+      }
+
+      button.secondary:hover {
+        background-color: #ddd;
+      }
+
+      #demo-container {
+        width: 100%;
+        max-width: 850px;
+      }
+
+      /* Mock HA card styles */
+      ha-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        color: #24292f;
+      }
+
+      body.dark ha-card {
+        background: #0d1117;
+        border: 1px solid #30363d;
+        box-shadow: none;
+        color: #c9d1d9;
+        --primary-text-color: #c9d1d9;
+        --secondary-text-color: #8b949e;
+      }
+
+      /* Apply CSS vars for the card */
+      ha-calendar-heatmap {
+        --card-background-color: white;
+        --primary-text-color: #24292f;
+        --secondary-text-color: #57606a;
+      }
+
+      body.dark ha-calendar-heatmap {
+        --card-background-color: #0d1117;
+        --primary-text-color: #c9d1d9;
+        --secondary-text-color: #8b949e;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Heatmap Demo</h1>
+
+    <div id="controls">
+      <div class="control-group">
+        <button class="secondary" id="theme-toggle">
+          Toggle Dark/Light Mode
+        </button>
+        <button id="regen-data">Generate Random Data</button>
+      </div>
+      <div class="control-group">
+        <label>Configuration (JSON)</label>
+        <textarea id="config-input">
+{
+  "entity": "sensor.contributions",
+  "title": "My Contribution Graph",
+  "range": "rolling",
+  "years": 1
+}
+            </textarea
+        >
+      </div>
+      <button id="apply-config">Apply Config</button>
+
+      <div
+        style="margin-top: 20px; border-top: 1px solid #ccc; padding-top: 10px"
+      >
+        <h3>Helpers</h3>
+        <label
+          >Range Mode:
+          <select id="h-range" onchange="updateHelper()">
+            <option value="rolling">Rolling</option>
+            <option value="year">Calendar Year</option>
+          </select></label
+        >
+        <label
+          >Years:
+          <input
+            type="number"
+            id="h-years"
+            value="1"
+            min="1"
+            onchange="updateHelper()"
+        /></label>
+        <button id="btn-update-json" onclick="updateConfigFromHelpers()">
+          Update JSON
+        </button>
+      </div>
+    </div>
+
+    <div id="demo-container">
+      <ha-calendar-heatmap id="card"></ha-calendar-heatmap>
+    </div>
+
+    <script type="module">
+      import './src/ha-calendar-heatmap.ts'
+
+      const card = document.getElementById('card')
+      const configInput = document.getElementById('config-input')
+      const applyBtn = document.getElementById('apply-config')
+      const themeBtn = document.getElementById('theme-toggle')
+      const regenBtn = document.getElementById('regen-data')
+
+      // Define global functions for inline handlers
+      window.updateHelper = () => {
+        // just UI update if needed
+      }
+
+      window.updateConfigFromHelpers = () => {
+        const range = document.getElementById('h-range').value
+        const years = parseInt(document.getElementById('h-years').value)
+
+        try {
+          const cfg = JSON.parse(configInput.value)
+          cfg.range = range
+          cfg.years = years
+          configInput.value = JSON.stringify(cfg, null, 2)
+          applyConfig()
+        } catch (e) {
+          alert('Fix JSON first')
+        }
+      }
+
+      // Mock Hass Object
+      let mockHass = {
+        states: {
+          'sensor.contributions': {
+            state: 'on',
+            attributes: {
+              data: [],
+            },
+          },
+        },
+      }
+
+      function generateRandomData() {
+        const data = []
+
+        // Generate data for 2 years (Current and Previous) to ensure we have data
+        // regardless of the range mode selected.
+        const today = new Date()
+        const start = new Date(today.getFullYear() - 1, 0, 1)
+        const end = new Date(today.getFullYear(), 11, 31)
+
+        const itr = new Date(start)
+        while (itr <= end) {
+          const dateStr = itr.toISOString().split('T')[0]
+
+          // Random count 0-10, weighted towards 0
+          let count = 0
+          if (Math.random() > 0.4) {
+            count = Math.floor(Math.random() * 15)
+          }
+          if (count > 0) {
+            data.push({ date: dateStr, count })
+          }
+          itr.setDate(itr.getDate() + 1)
+        }
+        return data
+      }
+
+      function updateHass() {
+        card.hass = { ...mockHass }
+      }
+
+      function applyConfig() {
+        try {
+          const config = JSON.parse(configInput.value)
+          card.setConfig(config)
+        } catch (e) {
+          console.error(e)
+          alert('Invalid JSON')
+        }
+      }
+
+      // Initialize
+      mockHass.states['sensor.contributions'].attributes.data =
+        generateRandomData()
+      updateHass()
+      applyConfig()
+
+      // Event Listeners
+      applyBtn.addEventListener('click', () => applyConfig())
+
+      regenBtn.addEventListener('click', () => {
+        mockHass.states['sensor.contributions'].attributes.data =
+          generateRandomData()
+        updateHass()
+      })
+
+      themeBtn.addEventListener('click', () => {
+        // Toggle dark mode - component auto-detects and updates colors
+        document.body.classList.toggle('dark')
+      })
+    </script>
+  </body>
+</html>

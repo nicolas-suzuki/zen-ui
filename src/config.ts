@@ -1,0 +1,156 @@
+/**
+ * Configuration schema and validation for ha-calendar-heatmap
+ *
+ * Lenient validation using valibot:
+ * - Only throws for required fields
+ * - Falls back to defaults for invalid optional values
+ */
+
+import * as v from 'valibot'
+
+// Week start day type
+export type WeekStartDay = 'sunday' | 'monday'
+
+// Default values
+export const CONFIG_DEFAULTS = {
+  range: 'rolling' as const,
+  years: 1,
+  weekStartDay: 'monday' as WeekStartDay,
+  levelCount: 5,
+  baseColor: '#40c463',
+  show_legend: true,
+  attribute: 'data',
+} as const
+
+// Convert weekStartDay to pipeline format (0 = Sunday, 1 = Monday)
+export function weekStartDayToNumber(day: WeekStartDay): 0 | 1 {
+  return day === 'sunday' ? 0 : 1
+}
+
+// Hex color regex
+const hexColorRegex = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/
+
+// Helper: transform with fallback (returns default if validation fails)
+function withFallback<T>(schema: v.GenericSchema<unknown, T>, fallback: T) {
+  return v.pipe(
+    v.unknown(),
+    v.transform((input) => {
+      const result = v.safeParse(schema, input)
+      return result.success ? result.output : fallback
+    }),
+  )
+}
+
+// Schema for weekStartDay: accepts string (case-insensitive) or legacy numbers
+const WeekStartDaySchema = v.pipe(
+  v.unknown(),
+  v.transform((input): WeekStartDay => {
+    if (typeof input === 'string') {
+      const lower = input.toLowerCase()
+      if (lower === 'sunday' || lower === 'sun') return 'sunday'
+      if (lower === 'monday' || lower === 'mon') return 'monday'
+    }
+    if (input === 0) return 'sunday'
+    if (input === 1) return 'monday'
+    return CONFIG_DEFAULTS.weekStartDay
+  }),
+)
+
+// Schema for range
+const RangeSchema = withFallback(
+  v.picklist(['rolling', 'year']),
+  CONFIG_DEFAULTS.range,
+)
+
+// Schema for years (positive integer >= 1)
+const YearsSchema = v.pipe(
+  v.unknown(),
+  v.transform((input) => {
+    if (typeof input === 'number' && Number.isInteger(input) && input >= 1) {
+      return input
+    }
+    return CONFIG_DEFAULTS.years
+  }),
+)
+
+// Schema for levelCount (integer 2-10)
+const LevelCountSchema = v.pipe(
+  v.unknown(),
+  v.transform((input) => {
+    if (typeof input === 'number' && Number.isInteger(input) && input >= 2 && input <= 10) {
+      return input
+    }
+    return CONFIG_DEFAULTS.levelCount
+  }),
+)
+
+// Schema for baseColor (hex color)
+const BaseColorSchema = v.pipe(
+  v.unknown(),
+  v.transform((input) => {
+    if (typeof input === 'string' && hexColorRegex.test(input)) {
+      return input
+    }
+    return CONFIG_DEFAULTS.baseColor
+  }),
+)
+
+// Main config schema
+const HeatmapConfigSchema = v.pipe(
+  v.object({
+    // Required
+    entity: v.pipe(
+      v.string('You need to define an entity'),
+      v.trim(),
+      v.minLength(1, 'You need to define an entity'),
+    ),
+
+    // Optional with defaults
+    title: v.optional(v.string()),
+    show_legend: v.optional(v.boolean(), CONFIG_DEFAULTS.show_legend),
+    attribute: v.optional(v.string(), CONFIG_DEFAULTS.attribute),
+    range: v.optional(RangeSchema, CONFIG_DEFAULTS.range),
+    years: v.optional(YearsSchema, CONFIG_DEFAULTS.years),
+    end_date: v.optional(v.string()),
+    weekStartDay: v.optional(WeekStartDaySchema, CONFIG_DEFAULTS.weekStartDay),
+    levelCount: v.optional(LevelCountSchema, CONFIG_DEFAULTS.levelCount),
+    levelThresholds: v.optional(v.array(v.number())),
+    baseColor: v.optional(BaseColorSchema, CONFIG_DEFAULTS.baseColor),
+    colors: v.optional(v.array(v.string())),
+    darkMode: v.optional(v.boolean()),
+  }),
+  // Cross-field validation for levelThresholds
+  v.transform((config) => {
+    if (config.levelThresholds) {
+      const expectedLength = config.levelCount - 1
+      if (config.levelThresholds.length !== expectedLength) {
+        // Wrong length - ignore thresholds (auto-calculate will be used)
+        return { ...config, levelThresholds: undefined }
+      }
+    }
+    return config
+  }),
+)
+
+// Export the inferred type
+export type HeatmapConfig = v.InferOutput<typeof HeatmapConfigSchema>
+
+/**
+ * Validates and normalizes heatmap configuration.
+ * Only throws for missing/invalid required fields.
+ * Invalid optional values fall back to defaults.
+ */
+export function validateConfig(config: unknown): HeatmapConfig {
+  if (!config || typeof config !== 'object') {
+    throw new Error('Configuration must be an object')
+  }
+
+  const result = v.safeParse(HeatmapConfigSchema, config)
+
+  if (!result.success) {
+    const issue = result.issues[0]
+    throw new Error(issue.message)
+  }
+
+  return result.output
+}
