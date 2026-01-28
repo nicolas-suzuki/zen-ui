@@ -14,20 +14,7 @@ A collection of beautiful visualization cards for Home Assistant. Track habits, 
 
 ## Table of Contents
 
-**[`Features`](#features)** **[`Installation`](#installation)** **[`Configuration`](#configuration)** **[`Examples`](#examples)** **[`Data Format`](#data-format)** **[`Development`](#development)**
-
-<br>
-
-## Features
-
-- **GitHub-style visualization** — Clean, familiar heatmap layout with customizable colors
-- **Multi-year support** — Display multiple years of data stacked vertically
-- **Rolling or calendar year modes** — Show last 365 days or full calendar years
-- **Customizable colors** — Set a base color and the card generates a beautiful gradient
-- **Dark mode support** — Automatically adapts to your Home Assistant theme
-- **Configurable intensity levels** — 2 to 10 color levels to match your data distribution
-- **Interactive tooltips** — Hover over any day to see the date and value
-- **Week start customization** — Start weeks on Sunday or Monday
+**[`Installation`](#installation)** **[`Configuration`](#configuration)** **[`Examples`](#examples)** **[`Data Format`](#data-format)** **[`Development`](#development)**
 
 <br>
 
