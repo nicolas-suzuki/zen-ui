@@ -1,5 +1,5 @@
 /**
- * Data Pipeline for ha-calendar-heatmap
+ * Data Pipeline for zen-ui
  *
  * Pure functions with no dependencies on Lit or Home Assistant.
  * Handles date/data logic separately from rendering.

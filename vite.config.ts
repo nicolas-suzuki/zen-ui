@@ -3,9 +3,9 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   build: {
     lib: {
-      entry: 'src/ha-calendar-heatmap.ts',
+      entry: 'src/zen-ui.ts',
       formats: ['es'],
-      fileName: 'ha-calendar-heatmap',
+      fileName: 'zen-ui',
     },
     outDir: 'dist',
     rollupOptions: {
@@ -14,7 +14,7 @@ export default defineConfig({
         // 'lit', 'lit/decorators.js'
       ],
       output: {
-        entryFileNames: 'ha-calendar-heatmap.js',
+        entryFileNames: 'zen-ui.js',
       },
     },
   },

@@ -12,12 +12,19 @@ import {
   type HeatmapConfig,
 } from './config'
 
-@customElement('ha-calendar-heatmap')
-export class HACalendarHeatmap extends LitElement {
+@customElement('zen-ui')
+export class ZenUI extends LitElement {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @property({ attribute: false }) public hass?: any
+
+  updated(changedProps: Map<string, unknown>): void {
+    if (changedProps.has('hass')) {
+      this._updateDarkMode()
+    }
+  }
   @state() private _config?: HeatmapConfig
   @state() private _darkMode = false
+  @state() private _tooltip?: { x: number; y: number; date: string; count: number }
 
   private _darkModeMediaQuery?: MediaQueryList
   private _darkModeObserver?: MutationObserver
@@ -77,23 +84,19 @@ export class HACalendarHeatmap extends LitElement {
   }
 
   private _detectDarkMode(): boolean {
-    // Explicit config override
-    if (this._config?.darkMode !== undefined) {
-      return this._config.darkMode
+    // Check Home Assistant theme (preferred method)
+    if (this.hass?.themes?.darkMode !== undefined) {
+      return this.hass.themes.darkMode
     }
-    // Check media query
+    // Fallback: Check media query
     if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) {
       return true
     }
-    // Check for .dark class on body or html
+    // Fallback: Check for .dark class on body or html (for demo page)
     if (
       document.body.classList.contains('dark') ||
       document.documentElement.classList.contains('dark')
     ) {
-      return true
-    }
-    // Check for [dark] attribute
-    if (document.body.hasAttribute('dark') || this.closest('[dark]')) {
       return true
     }
     return false
@@ -139,7 +142,7 @@ export class HACalendarHeatmap extends LitElement {
     }
 
     ha-card {
-      padding: 16px;
+      padding: 20px 24px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -148,10 +151,13 @@ export class HACalendarHeatmap extends LitElement {
     }
     .header {
       width: 100%;
-      font-size: 16px;
-      margin-bottom: 16px;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
       color: var(--primary-text-color);
       text-align: left;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
     }
     .graph-container {
       display: flex;
@@ -179,15 +185,67 @@ export class HACalendarHeatmap extends LitElement {
     .legend {
       display: flex;
       align-items: center;
-      gap: 4px;
-      font-size: 10px;
+      gap: 3px;
+      font-size: 11px;
+      font-weight: 500;
       color: var(--secondary-text-color);
-      margin-top: 8px;
+      margin-top: 4px;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+    }
+    .legend span {
+      margin: 0 4px;
     }
     .legend-item {
       width: 10px;
       height: 10px;
       border-radius: 2px;
+    }
+    .year-graph {
+      width: 100%;
+      margin-bottom: 16px;
+    }
+    .year-graph:last-child {
+      margin-bottom: 8px;
+    }
+    .year-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--secondary-text-color);
+      margin-bottom: 6px;
+      margin-left: 30px;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+      letter-spacing: -0.01em;
+    }
+    .tooltip {
+      position: fixed;
+      padding: 8px 12px;
+      background: var(--primary-text-color);
+      color: var(--ha-card-background);
+      border-radius: 8px;
+      font-size: 12px;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+      pointer-events: none;
+      z-index: 1000;
+      white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transform: translate(-50%, -100%) translateY(-8px);
+    }
+    .tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-top-color: var(--primary-text-color);
+    }
+    .tooltip-date {
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .tooltip-count {
+      opacity: 0.8;
+      font-weight: 500;
     }
   `
 
@@ -217,35 +275,44 @@ export class HACalendarHeatmap extends LitElement {
     }
   }
 
+  private _onCellMouseEnter(e: MouseEvent, date: string, count: number): void {
+    const rect = (e.target as SVGRectElement).getBoundingClientRect()
+    this._tooltip = {
+      x: rect.left + rect.width / 2,
+      y: rect.top,
+      date,
+      count,
+    }
+  }
+
+  private _onCellMouseLeave(): void {
+    this._tooltip = undefined
+  }
+
+  private _formatTooltipDate(dateStr: string): string {
+    const date = new Date(dateStr)
+    return date.toLocaleDateString('default', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    })
+  }
+
   private _getColorScale(): string[] {
     const config = this._config!
-
-    // Use legacy colors array if provided
-    if (config.colors && config.colors.length >= config.levelCount) {
-      return config.colors.slice(0, config.levelCount)
-    }
-
-    // Generate colors from base color (uses reactive _darkMode state)
     return generateColorScale(config.baseColor, config.levelCount, {
       darkMode: this._darkMode,
     })
   }
 
-  render() {
-    if (!this._config || !this.hass) return html``
-
-    const rawData = this._getRawData()
-    const pipelineConfig = this._getPipelineConfig()
-    const colorScale = this._getColorScale()
-    const isYearMode = this._config.range === 'year'
-
-    // Process data through pipeline (returns array, we take first for single view)
-    const heatmapDataArray = processHeatmapData(pipelineConfig, rawData)
-    const heatmapData: HeatmapData | undefined = heatmapDataArray[0]
-
-    if (!heatmapData) return html``
-
-    // Grid config
+  private _renderYearGraph(
+    heatmapData: HeatmapData,
+    colorScale: string[],
+    weekStart: 0 | 1,
+    isYearMode: boolean,
+    showYearLabel: boolean,
+  ) {
     const RECT_SIZE = 10
     const GAP = 3
     const STEP = RECT_SIZE + GAP
@@ -254,7 +321,6 @@ export class HACalendarHeatmap extends LitElement {
 
     // Build month labels from the processed weeks
     const monthStartColumns = new Map<number, number>()
-    const weekStart = pipelineConfig.weekStartDay ?? 1
 
     heatmapData.weeks.forEach((week, colIndex) => {
       for (const day of week) {
@@ -290,8 +356,8 @@ export class HACalendarHeatmap extends LitElement {
       }
     }
 
-    const width = heatmapData.weeks.length * STEP
-    const height = 7 * STEP
+    const width = heatmapData.weeks.length * STEP - GAP
+    const height = 7 * STEP - GAP
 
     // Day labels based on week start day
     const dayLabels =
@@ -307,9 +373,66 @@ export class HACalendarHeatmap extends LitElement {
             { row: 5, label: 'Sat' },
           ]
 
+    const yearLabel = heatmapData.range.label || ''
+
+    return html`
+      <div class="year-graph">
+        ${showYearLabel ? html`<div class="year-label">${yearLabel}</div>` : ''}
+        <svg viewBox="0 0 ${X_START + width + 5} ${Y_START + height + 2}">
+          <g transform="translate(${X_START}, ${Y_START})">
+            ${labels}
+            ${heatmapData.weeks.map(
+              (week, wIndex) => svg`
+                  <g transform="translate(${wIndex * STEP}, 0)">
+                      ${week.map((day, dIndex) => {
+                        const color =
+                          colorScale[day.level] ??
+                          colorScale[colorScale.length - 1]
+                        return svg`
+                              <rect
+                                  width="${RECT_SIZE}"
+                                  height="${RECT_SIZE}"
+                                  x="0"
+                                  y="${dIndex * STEP}"
+                                  fill="${color}"
+                                  style="cursor: pointer;"
+                                  @mouseenter=${(e: MouseEvent) => this._onCellMouseEnter(e, day.date, day.count)}
+                                  @mouseleave=${this._onCellMouseLeave}
+                              />
+                          `
+                      })}
+                  </g>
+              `,
+            )}
+            ${dayLabels.map(
+              ({ row, label }) => svg`
+                  <text x="-5" y="${row * STEP + 9}" text-anchor="end" style="font-size: 9px;">${label}</text>
+              `,
+            )}
+          </g>
+        </svg>
+      </div>
+    `
+  }
+
+  render() {
+    if (!this._config || !this.hass) return html``
+
+    const rawData = this._getRawData()
+    const pipelineConfig = this._getPipelineConfig()
+    const colorScale = this._getColorScale()
+    const isYearMode = this._config.range === 'year'
+    const weekStart = pipelineConfig.weekStartDay ?? 1
+
+    // Process data through pipeline (returns array of years)
+    const heatmapDataArray = processHeatmapData(pipelineConfig, rawData)
+
+    if (heatmapDataArray.length === 0) return html``
+
+    const showYearLabels = heatmapDataArray.length > 1
+
     // Render legend items dynamically based on levelCount
     const legendItems = colorScale.map((color) => {
-      // Skip transparent for legend display, show a light border instead
       const style =
         color === 'transparent'
           ? 'background-color: transparent; border: 1px solid var(--secondary-text-color);'
@@ -317,44 +440,25 @@ export class HACalendarHeatmap extends LitElement {
       return html`<div class="legend-item" style="${style}"></div>`
     })
 
+    const cardStyle = this._config.backgroundColor
+      ? `background-color: ${this._config.backgroundColor};`
+      : ''
+
     return html`
-      <ha-card>
+      <ha-card style="${cardStyle}">
         ${this._config.title
           ? html`<div class="header">${this._config.title}</div>`
           : ''}
         <div class="graph-container">
-          <svg viewBox="0 0 ${width + 50} ${height + 50}">
-            <g transform="translate(${X_START}, ${Y_START})">
-              ${labels}
-              ${heatmapData.weeks.map(
-                (week, wIndex) => svg`
-                    <g transform="translate(${wIndex * STEP}, 0)">
-                        ${week.map((day, dIndex) => {
-                          const color =
-                            colorScale[day.level] ??
-                            colorScale[colorScale.length - 1]
-                          return svg`
-                                <rect
-                                    width="${RECT_SIZE}"
-                                    height="${RECT_SIZE}"
-                                    x="0"
-                                    y="${dIndex * STEP}"
-                                    fill="${color}"
-                                >
-                                  <title>${day.count} on ${day.date}</title>
-                                </rect>
-                            `
-                        })}
-                    </g>
-                `,
-              )}
-              ${dayLabels.map(
-                ({ row, label }) => svg`
-                    <text x="-5" y="${row * STEP + 9}" text-anchor="end" style="font-size: 9px;">${label}</text>
-                `,
-              )}
-            </g>
-          </svg>
+          ${heatmapDataArray.map((heatmapData) =>
+            this._renderYearGraph(
+              heatmapData,
+              colorScale,
+              weekStart as 0 | 1,
+              isYearMode,
+              showYearLabels,
+            ),
+          )}
           <div class="legend">
             <span>Less</span>
             ${legendItems}
@@ -362,6 +466,19 @@ export class HACalendarHeatmap extends LitElement {
           </div>
         </div>
       </ha-card>
+      ${this._tooltip
+        ? html`
+            <div
+              class="tooltip"
+              style="left: ${this._tooltip.x}px; top: ${this._tooltip.y}px;"
+            >
+              <div class="tooltip-date">
+                ${this._formatTooltipDate(this._tooltip.date)}
+              </div>
+              <div class="tooltip-count">${this._tooltip.count}</div>
+            </div>
+          `
+        : ''}
     `
   }
 }

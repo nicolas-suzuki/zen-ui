@@ -1,5 +1,5 @@
 /**
- * Configuration schema and validation for ha-calendar-heatmap
+ * Configuration schema and validation for zen-ui
  *
  * Lenient validation using valibot:
  * - Only throws for required fields
@@ -116,8 +116,7 @@ const HeatmapConfigSchema = v.pipe(
     levelCount: v.optional(LevelCountSchema, CONFIG_DEFAULTS.levelCount),
     levelThresholds: v.optional(v.array(v.number())),
     baseColor: v.optional(BaseColorSchema, CONFIG_DEFAULTS.baseColor),
-    colors: v.optional(v.array(v.string())),
-    darkMode: v.optional(v.boolean()),
+    backgroundColor: v.optional(v.string()),
   }),
   // Cross-field validation for levelThresholds
   v.transform((config) => {

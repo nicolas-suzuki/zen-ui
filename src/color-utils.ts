@@ -1,5 +1,5 @@
 /**
- * Color Utilities for ha-calendar-heatmap
+ * Color Utilities for zen-ui
  *
  * HSL-based color scale generation for heatmap levels.
  */

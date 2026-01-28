@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zen UI Demo</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        background-color: #f0f0f0;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      body.dark {
+        background-color: #0d1117;
+        color: #c9d1d9;
+      }
+
+      h1 {
+        margin-bottom: 20px;
+      }
+
+      .controls {
+        margin-bottom: 20px;
+        display: flex;
+        gap: 10px;
+      }
+
+      button {
+        padding: 8px 16px;
+        cursor: pointer;
+        background-color: #0969da;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+      }
+
+      button:hover {
+        background-color: #035fc7;
+      }
+
+      button.secondary {
+        background-color: #eee;
+        color: #333;
+      }
+
+      button.secondary:hover {
+        background-color: #ddd;
+      }
+
+      .demo-container {
+        width: 100%;
+        max-width: 850px;
+        margin-bottom: 30px;
+      }
+
+      .demo-label {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 8px;
+        font-family: monospace;
+      }
+
+      body.dark .demo-label {
+        color: #8b949e;
+      }
+
+      .card-wrapper {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      body.dark .card-wrapper {
+        background: #0d1117;
+        border: 1px solid #30363d;
+        box-shadow: none;
+      }
+
+      .config-display {
+        border-top: 1px solid #e1e4e8;
+        padding: 12px 16px;
+        font-family: monospace;
+        font-size: 11px;
+        color: #57606a;
+        white-space: pre;
+        overflow-x: auto;
+      }
+
+      body.dark .config-display {
+        border-top-color: #30363d;
+        color: #8b949e;
+      }
+
+      /* Override ha-card styles to remove its own background */
+      .card-wrapper ha-card {
+        box-shadow: none;
+        border-radius: 0;
+      }
+
+      body.dark .card-wrapper ha-card {
+        border: none;
+      }
+
+      /* Apply CSS vars for the card */
+      zen-ui {
+        --card-background-color: white;
+        --primary-text-color: #24292f;
+        --secondary-text-color: #57606a;
+      }
+
+      body.dark zen-ui {
+        --card-background-color: #0d1117;
+        --primary-text-color: #c9d1d9;
+        --secondary-text-color: #8b949e;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Zen UI Demo</h1>
+
+    <div class="controls">
+      <button class="secondary" id="theme-toggle">
+        Toggle Dark/Light Mode
+      </button>
+      <button id="regen-data">Generate Random Data</button>
+    </div>
+
+    <div class="demo-container">
+      <div class="demo-label">Rolling (default)</div>
+      <div class="card-wrapper">
+        <zen-ui id="card-rolling"></zen-ui>
+        <div class="config-display" id="config-rolling"></div>
+      </div>
+    </div>
+
+    <div class="demo-container">
+      <div class="demo-label">Calendar Year - 2 years</div>
+      <div class="card-wrapper">
+        <zen-ui id="card-multiyear"></zen-ui>
+        <div class="config-display" id="config-multiyear"></div>
+      </div>
+    </div>
+
+    <div class="demo-container">
+      <div class="demo-label">Binary Data (levelCount: 2)</div>
+      <div class="card-wrapper">
+        <zen-ui id="card-binary"></zen-ui>
+        <div class="config-display" id="config-binary"></div>
+      </div>
+    </div>
+
+    <div class="demo-container">
+      <div class="demo-label">Custom Theme</div>
+      <div
+        class="card-wrapper"
+        style="background: transparent; box-shadow: none"
+      >
+        <zen-ui
+          id="card-themed"
+          style="--primary-text-color: #e8e8e8; --secondary-text-color: #7f8ea3"
+        ></zen-ui>
+        <div
+          class="config-display"
+          style="
+            border-top-color: #2d2d44;
+            color: #7f8ea3;
+            background: #1a1a2e;
+            border-radius: 0 0 12px 12px;
+          "
+        ></div>
+      </div>
+    </div>
+
+    <script type="module">
+      import './src/zen-ui.ts'
+
+      const cardRolling = document.getElementById('card-rolling')
+      const cardMultiyear = document.getElementById('card-multiyear')
+      const cardBinary = document.getElementById('card-binary')
+      const cardThemed = document.getElementById('card-themed')
+      const configRolling = document.getElementById('config-rolling')
+      const configMultiyear = document.getElementById('config-multiyear')
+      const configBinary = document.getElementById('config-binary')
+      const configThemed =
+        cardThemed.parentElement.querySelector('.config-display')
+      const themeBtn = document.getElementById('theme-toggle')
+      const regenBtn = document.getElementById('regen-data')
+
+      // Mock Hass Object
+      let mockHass = {
+        states: {
+          'sensor.activity': {
+            state: 'on',
+            attributes: {
+              data: [],
+            },
+          },
+          'sensor.meditation': {
+            state: 'on',
+            attributes: {
+              data: [],
+            },
+          },
+        },
+      }
+
+      function generateRandomData() {
+        const data = []
+
+        // Generate data for 3 years to support multi-year display
+        const today = new Date()
+        const start = new Date(today.getFullYear() - 2, 0, 1)
+        const end = new Date(today.getFullYear(), 11, 31)
+
+        const itr = new Date(start)
+        while (itr <= end) {
+          const dateStr = itr.toISOString().split('T')[0]
+
+          // Random count 0-15, weighted towards 0
+          let count = 0
+          if (Math.random() > 0.4) {
+            count = Math.floor(Math.random() * 15)
+          }
+          if (count > 0) {
+            data.push({ date: dateStr, count })
+          }
+          itr.setDate(itr.getDate() + 1)
+        }
+        return data
+      }
+
+      function generateBinaryData() {
+        const data = []
+        const today = new Date()
+        const start = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate())
+        const end = new Date(today)
+
+        const itr = new Date(start)
+        while (itr <= end) {
+          const dateStr = itr.toISOString().split('T')[0]
+          // Binary: ~75% chance of 1 for denser data
+          if (Math.random() > 0.25) {
+            data.push({ date: dateStr, count: 1 })
+          }
+          itr.setDate(itr.getDate() + 1)
+        }
+        return data
+      }
+
+      function updateAllCards() {
+        const hass = { ...mockHass }
+        cardRolling.hass = hass
+        cardMultiyear.hass = hass
+        cardBinary.hass = hass
+        cardThemed.hass = hass
+      }
+
+      // Initial configs
+      const rollingConfig = {
+        entity: 'sensor.activity',
+        title: 'Activity',
+      }
+
+      const multiyearConfig = {
+        entity: 'sensor.activity',
+        title: 'Activity History',
+        range: 'year',
+        years: 2,
+      }
+
+      const binaryConfig = {
+        entity: 'sensor.meditation',
+        title: 'Meditation Streak',
+        levelCount: 2,
+        baseColor: '#c6a0f6',
+      }
+
+      const themedConfig = {
+        entity: 'sensor.activity',
+        title: 'Sleep Tracker',
+        baseColor: '#e91e8c',
+        backgroundColor: '#1a1a2e',
+      }
+
+      // Convert config to YAML format
+      function toYaml(config) {
+        let yaml = 'type: custom:zen-ui\n'
+        for (const [key, value] of Object.entries(config)) {
+          yaml += `${key}: ${value}\n`
+        }
+        return yaml.trim()
+      }
+
+      // Display configs
+      configRolling.textContent = toYaml(rollingConfig)
+      configMultiyear.textContent = toYaml(multiyearConfig)
+      configBinary.textContent = toYaml(binaryConfig)
+      configThemed.textContent = toYaml(themedConfig)
+
+      // Initialize configs
+      cardRolling.setConfig(rollingConfig)
+      cardMultiyear.setConfig(multiyearConfig)
+      cardBinary.setConfig(binaryConfig)
+      cardThemed.setConfig(themedConfig)
+
+      // Initialize data
+      mockHass.states['sensor.activity'].attributes.data = generateRandomData()
+      mockHass.states['sensor.meditation'].attributes.data = generateBinaryData()
+      updateAllCards()
+
+      // Event Listeners
+      regenBtn.addEventListener('click', () => {
+        mockHass.states['sensor.activity'].attributes.data =
+          generateRandomData()
+        mockHass.states['sensor.meditation'].attributes.data =
+          generateBinaryData()
+        updateAllCards()
+      })
+
+      themeBtn.addEventListener('click', () => {
+        document.body.classList.toggle('dark')
+      })
+    </script>
+  </body>
+</html>

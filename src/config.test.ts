@@ -167,14 +167,6 @@ describe('validateConfig', () => {
       expect(validateConfig({ entity: 'e', end_date: '2024-12-31' }).end_date).toBe('2024-12-31')
     })
 
-    it('passes through colors array', () => {
-      const colors = ['#111', '#222', '#333']
-      expect(validateConfig({ entity: 'e', colors }).colors).toEqual(colors)
-    })
 
-    it('passes through darkMode', () => {
-      expect(validateConfig({ entity: 'e', darkMode: true }).darkMode).toBe(true)
-      expect(validateConfig({ entity: 'e', darkMode: false }).darkMode).toBe(false)
-    })
   })
 })
