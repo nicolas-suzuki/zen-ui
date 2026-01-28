@@ -28,6 +28,7 @@ describe('validateConfig', () => {
     it('applies all defaults for minimal config', () => {
       const config = validateConfig({ entity: 'sensor.test' })
 
+      expect(config.card).toBe(CONFIG_DEFAULTS.card)
       expect(config.range).toBe(CONFIG_DEFAULTS.range)
       expect(config.years).toBe(CONFIG_DEFAULTS.years)
       expect(config.weekStartDay).toBe(CONFIG_DEFAULTS.weekStartDay)
@@ -35,6 +36,22 @@ describe('validateConfig', () => {
       expect(config.baseColor).toBe(CONFIG_DEFAULTS.baseColor)
       expect(config.show_legend).toBe(CONFIG_DEFAULTS.show_legend)
       expect(config.attribute).toBe(CONFIG_DEFAULTS.attribute)
+    })
+  })
+
+  describe('card type validation', () => {
+    it('defaults to heatmap when not specified', () => {
+      const config = validateConfig({ entity: 'e' })
+      expect(config.card).toBe('heatmap')
+    })
+
+    it('accepts valid card type', () => {
+      expect(validateConfig({ entity: 'e', card: 'heatmap' }).card).toBe('heatmap')
+    })
+
+    it('falls back to default for invalid card type', () => {
+      expect(validateConfig({ entity: 'e', card: 'invalid' }).card).toBe('heatmap')
+      expect(validateConfig({ entity: 'e', card: 123 }).card).toBe('heatmap')
     })
   })
 

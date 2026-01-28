@@ -1,0 +1,32 @@
+/**
+ * Card Renderer Interface
+ *
+ * Defines the contract for all card type renderers.
+ */
+
+import type { CSSResult, TemplateResult } from 'lit'
+import type { CardConfig } from '../config'
+import type { HeatmapData } from '../data-pipeline'
+
+export interface Tooltip {
+  x: number
+  y: number
+  date: string
+  count: number
+}
+
+export interface CardRenderContext {
+  config: CardConfig
+  data: HeatmapData[]
+  colorScale: string[]
+  darkMode: boolean
+  tooltip?: Tooltip
+  onCellMouseEnter: (e: MouseEvent, date: string, count: number) => void
+  onCellMouseLeave: () => void
+}
+
+export interface CardRenderer {
+  render(context: CardRenderContext): TemplateResult
+  styles: CSSResult
+  getCardSize(config: CardConfig): number
+}

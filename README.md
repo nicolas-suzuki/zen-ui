@@ -1,5 +1,7 @@
 # Zen UI
 
+> **Note:** This project is being built with LLM agents, though tested by humans. It is an experiment — please expect issues and [raise them](../../issues).
+
 A GitHub-style contribution heatmap card for Home Assistant. Visualize your sensor data as a beautiful calendar heatmap, perfect for tracking habits, activities, workouts, or any daily metrics.
 
 [![CI](https://github.com/stomar/zen-ui/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/stomar/zen-ui/actions/workflows/ci.yml) [![Stars](https://img.shields.io/github/stars/stomar/zen-ui)](#) [![Last commit](https://img.shields.io/github/last-commit/stomar/zen-ui)](#) ![Light Mode](https://img.shields.io/badge/Light%20Mode-supported-brightgreen) ![Dark Mode](https://img.shields.io/badge/Dark%20Mode-supported-blueviolet)

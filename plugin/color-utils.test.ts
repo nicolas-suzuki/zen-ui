@@ -160,16 +160,17 @@ describe('generateColorScale', () => {
     })
   })
 
-  it('works with levelCount=2 (binary)', () => {
-    const colors = generateColorScale('#40c463', 2, {
+  it('works with levelCount=2 (binary) - uses original color', () => {
+    const baseColor = '#40c463'
+    const colors = generateColorScale(baseColor, 2, {
       maxLightness: 80,
       minLightness: 20,
     })
 
     expect(colors).toHaveLength(2)
-    expect(colors[0]).toMatch(/^hsl\(\d+, \d+%, \d+%\)$/) // Light tint, not transparent
-    // Single non-zero level should be middle lightness
-    expect(colors[1]).toMatch(/hsl\(136, 53%, 50%\)/)
+    expect(colors[0]).toMatch(/^hsl\(\d+, \d+%, \d+%\)$/) // Light tint for empty
+    // Single non-zero level should use original base color
+    expect(colors[1]).toBe(baseColor)
   })
 
   it('uses custom lightness range', () => {
@@ -197,13 +198,20 @@ describe('generateColorScale', () => {
     const levelCounts = [2, 3, 4, 5, 6, 7, 8, 9, 10]
 
     it.each(levelCounts)('generates %i levels correctly', (levelCount) => {
-      const colors = generateColorScale('#40c463', levelCount)
+      const baseColor = '#40c463'
+      const colors = generateColorScale(baseColor, levelCount)
 
       expect(colors).toHaveLength(levelCount)
 
-      // All levels should be valid HSL (allowing decimal percentages)
+      // All levels should be valid HSL or hex (for binary mode)
+      const hslOrHexPattern = /^(hsl\(\d+, \d+%, [\d.]+%\)|#[0-9A-Fa-f]{3,6})$/
       for (const color of colors) {
-        expect(color).toMatch(/^hsl\(\d+, \d+%, [\d.]+%\)$/)
+        expect(color).toMatch(hslOrHexPattern)
+      }
+
+      // For binary mode (levelCount=2), level 1 should be original color
+      if (levelCount === 2) {
+        expect(colors[1]).toBe(baseColor)
       }
     })
   })

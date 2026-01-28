@@ -117,9 +117,8 @@ export function generateColorScale(
   const nonZeroLevels = levelCount - 1
 
   if (nonZeroLevels === 1) {
-    // Only one non-zero level: use middle lightness
-    const midLightness = (maxLightness + minLightness) / 2
-    colors.push(hslToCSS({ h, s, l: midLightness }))
+    // Only one non-zero level (binary mode): use original base color
+    colors.push(baseColor)
   } else {
     // Distribute lightness across levels
     for (let i = 0; i < nonZeroLevels; i++) {

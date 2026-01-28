@@ -1,13 +1,14 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
+  root: 'web',
   build: {
     lib: {
-      entry: 'src/zen-ui.ts',
+      entry: '../plugin/zen-ui.ts',
       formats: ['es'],
       fileName: 'zen-ui',
     },
-    outDir: 'dist',
+    outDir: '../dist',
     rollupOptions: {
       external: [
         // Do not externalize lit, we want to bundle it so the card works standalone

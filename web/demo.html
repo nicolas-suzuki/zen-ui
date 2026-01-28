@@ -179,7 +179,7 @@
     </div>
 
     <script type="module">
-      import './src/zen-ui.ts'
+      import '../plugin/zen-ui.ts'
 
       const cardRolling = document.getElementById('card-rolling')
       const cardMultiyear = document.getElementById('card-multiyear')
@@ -239,7 +239,11 @@
       function generateBinaryData() {
         const data = []
         const today = new Date()
-        const start = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate())
+        const start = new Date(
+          today.getFullYear() - 1,
+          today.getMonth(),
+          today.getDate(),
+        )
         const end = new Date(today)
 
         const itr = new Date(start)
@@ -312,7 +316,8 @@
 
       // Initialize data
       mockHass.states['sensor.activity'].attributes.data = generateRandomData()
-      mockHass.states['sensor.meditation'].attributes.data = generateBinaryData()
+      mockHass.states['sensor.meditation'].attributes.data =
+        generateBinaryData()
       updateAllCards()
 
       // Event Listeners
