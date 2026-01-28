@@ -16,7 +16,6 @@ export type CardType = 'heatmap'
 
 // Default values
 export const CONFIG_DEFAULTS = {
-  card: 'heatmap' as CardType,
   range: 'rolling' as const,
   years: 1,
   weekStartDay: 'monday' as WeekStartDay,
@@ -99,12 +98,6 @@ const BaseColorSchema = v.pipe(
   }),
 )
 
-// Schema for card type
-const CardTypeSchema = withFallback(
-  v.picklist(['heatmap']),
-  CONFIG_DEFAULTS.card,
-)
-
 // Main config schema (keeping name for backward compatibility)
 const HeatmapConfigSchema = v.pipe(
   v.object({
@@ -115,8 +108,8 @@ const HeatmapConfigSchema = v.pipe(
       v.minLength(1, 'You need to define an entity'),
     ),
 
-    // Card type (defaults to 'heatmap' for backward compatibility)
-    card: v.optional(CardTypeSchema, CONFIG_DEFAULTS.card),
+    // Card type (required)
+    card: v.picklist(['heatmap'], 'You need to define a card type'),
 
     // Optional with defaults
     title: v.optional(v.string()),

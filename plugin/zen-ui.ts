@@ -31,7 +31,7 @@ export class ZenUI extends LitElement {
 
   public getCardSize(): number {
     if (!this._config) return 3
-    const renderer = getCardRenderer(this._config.card ?? 'heatmap')
+    const renderer = getCardRenderer(this._config.card)
     return renderer.getCardSize(this._config)
   }
 
@@ -170,7 +170,7 @@ export class ZenUI extends LitElement {
   render() {
     if (!this._config || !this.hass) return html``
 
-    const renderer = getCardRenderer(this._config.card ?? 'heatmap')
+    const renderer = getCardRenderer(this._config.card)
     const rawData = this._getRawData()
     const pipelineConfig = this._getPipelineConfig()
     const data = processHeatmapData(pipelineConfig, rawData)

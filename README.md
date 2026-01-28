@@ -2,7 +2,10 @@
 
 > **Note:** This project is being built with LLM agents, though tested by humans. It is an experiment — please expect issues and [raise them](../../issues).
 
-A GitHub-style contribution heatmap card for Home Assistant. Visualize your sensor data as a beautiful calendar heatmap, perfect for tracking habits, activities, workouts, or any daily metrics.
+A collection of beautiful visualization cards for Home Assistant. Track habits, activities, workouts, or any daily metrics with clean, customizable visualizations.
+
+**Available Cards:**
+- **Heatmap** — GitHub-style contribution calendar (default)
 
 [![CI](https://github.com/stomar/zen-ui/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/stomar/zen-ui/actions/workflows/ci.yml) [![Stars](https://img.shields.io/github/stars/stomar/zen-ui)](#) [![Last commit](https://img.shields.io/github/last-commit/stomar/zen-ui)](#) ![Light Mode](https://img.shields.io/badge/Light%20Mode-supported-brightgreen) ![Dark Mode](https://img.shields.io/badge/Dark%20Mode-supported-blueviolet)
 
@@ -66,6 +69,7 @@ Add the card to your dashboard using the UI or YAML:
 
 ```yaml
 type: custom:zen-ui
+card: heatmap
 entity: sensor.your_sensor
 ```
 
@@ -78,6 +82,7 @@ entity: sensor.your_sensor
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `entity` | string | **Required** | Entity ID that contains your data |
+| `card` | string | **Required** | Card type: `heatmap` |
 | `title` | string | — | Card title displayed at the top |
 | `attribute` | string | `data` | Entity attribute containing the data array |
 | `range` | string | `rolling` | `rolling` (last 365 days) or `year` (calendar years) |
@@ -103,6 +108,7 @@ entity: sensor.your_sensor
 
 ```yaml
 type: custom:zen-ui
+card: heatmap
 entity: sensor.daily_steps
 title: Daily Steps
 ```
@@ -119,6 +125,7 @@ Display multiple calendar years stacked vertically:
 
 ```yaml
 type: custom:zen-ui
+card: heatmap
 entity: sensor.workout_tracker
 title: Workout History
 range: year
@@ -137,6 +144,7 @@ For simple yes/no tracking (did I do it today?), use `levelCount: 2`:
 
 ```yaml
 type: custom:zen-ui
+card: heatmap
 entity: sensor.meditation
 title: Meditation Streak
 levelCount: 2
@@ -153,6 +161,7 @@ baseColor: "#c6a0f6"
 
 ```yaml
 type: custom:zen-ui
+card: heatmap
 entity: sensor.meditation_minutes
 title: Meditation
 baseColor: "#e91e8c"
@@ -168,6 +177,7 @@ baseColor: "#e91e8c"
 
 ```yaml
 type: custom:zen-ui
+card: heatmap
 entity: sensor.sleep
 title: Sleep Tracker
 baseColor: "#e91e8c"
@@ -186,6 +196,7 @@ Increase intensity levels for more nuanced visualization:
 
 ```yaml
 type: custom:zen-ui
+card: heatmap
 entity: sensor.commits
 title: Code Commits
 levelCount: 8
@@ -203,6 +214,7 @@ Define your own percentile thresholds for level boundaries:
 
 ```yaml
 type: custom:zen-ui
+card: heatmap
 entity: sensor.activity
 title: Activity Score
 levelCount: 5
@@ -219,6 +231,7 @@ levelThresholds: [10, 30, 60, 90]
 
 ```yaml
 type: custom:zen-ui
+card: heatmap
 entity: sensor.habits
 title: Habit Tracker
 weekStartDay: sunday
@@ -288,11 +301,24 @@ pnpm build
 <br>
 
 ```
-src/
-├── zen-ui.ts   # Main component
+plugin/                      # Home Assistant plugin source
+├── zen-ui.ts                # Main component coordinator
+├── config.ts                # Configuration validation
 ├── data-pipeline.ts         # Data processing logic
 ├── color-utils.ts           # HSL color generation
-└── config.ts                # Configuration validation
+├── cards/                   # Card type implementations
+│   ├── types.ts             # CardRenderer interface
+│   ├── registry.ts          # Card type registry
+│   └── heatmap/             # Heatmap card
+│       ├── index.ts
+│       ├── render.ts
+│       └── styles.ts
+└── shared/
+    └── styles.ts            # Shared card styles
+
+web/                         # Demo & development
+├── index.html
+└── demo.html
 ```
 
 </details>
