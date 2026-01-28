@@ -106,12 +106,8 @@ const BaseColorSchema = v.pipe(
 // Main config schema (keeping name for backward compatibility)
 const HeatmapConfigSchema = v.pipe(
   v.object({
-    // Required
-    entity: v.pipe(
-      v.string('You need to define an entity'),
-      v.trim(),
-      v.minLength(1, 'You need to define an entity'),
-    ),
+    // Required (but can be empty for preview mode)
+    entity: v.pipe(v.string('You need to define an entity'), v.trim()),
 
     // Card type (required)
     card: v.picklist(['heatmap'], 'You need to define a card type'),

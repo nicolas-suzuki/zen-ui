@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zen UI - Preview Mode</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        background-color: #f0f0f0;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      body.dark {
+        background-color: #0d1117;
+        color: #c9d1d9;
+      }
+
+      h1 {
+        margin-bottom: 8px;
+      }
+
+      .subtitle {
+        color: #57606a;
+        margin-bottom: 24px;
+        font-size: 14px;
+      }
+
+      body.dark .subtitle {
+        color: #8b949e;
+      }
+
+      .controls {
+        margin-bottom: 20px;
+      }
+
+      button {
+        padding: 8px 16px;
+        cursor: pointer;
+        background-color: #eee;
+        color: #333;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+      }
+
+      button:hover {
+        background-color: #ddd;
+      }
+
+      .demo-container {
+        width: 100%;
+        max-width: 850px;
+      }
+
+      .demo-label {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 8px;
+        font-family: monospace;
+      }
+
+      body.dark .demo-label {
+        color: #8b949e;
+      }
+
+      .card-wrapper {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      body.dark .card-wrapper {
+        background: #0d1117;
+        border: 1px solid #30363d;
+        box-shadow: none;
+      }
+
+      .config-display {
+        border-top: 1px solid #e1e4e8;
+        padding: 12px 16px;
+        font-family: monospace;
+        font-size: 11px;
+        color: #57606a;
+        white-space: pre;
+      }
+
+      body.dark .config-display {
+        border-top-color: #30363d;
+        color: #8b949e;
+      }
+
+      .card-wrapper ha-card {
+        box-shadow: none;
+        border-radius: 0;
+      }
+
+      body.dark .card-wrapper ha-card {
+        border: none;
+      }
+
+      zen-ui {
+        --card-background-color: white;
+        --primary-text-color: #24292f;
+        --secondary-text-color: #57606a;
+      }
+
+      body.dark zen-ui {
+        --card-background-color: #0d1117;
+        --primary-text-color: #c9d1d9;
+        --secondary-text-color: #8b949e;
+      }
+
+      .info-box {
+        background: #ddf4ff;
+        border: 1px solid #54aeff;
+        border-radius: 6px;
+        padding: 12px 16px;
+        margin-bottom: 24px;
+        max-width: 850px;
+        font-size: 13px;
+        color: #0969da;
+      }
+
+      body.dark .info-box {
+        background: #1f3d5c;
+        border-color: #388bfd;
+        color: #79c0ff;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Zen UI - Preview Mode</h1>
+    <p class="subtitle">
+      Simulates HA card picker preview (no entity data)
+    </p>
+
+    <div class="info-box">
+      This card has no <code>hass</code> object or entity data. It uses
+      auto-generated mock data to simulate the Home Assistant card picker preview.
+    </div>
+
+    <div class="controls">
+      <button id="theme-toggle">Toggle Dark/Light Mode</button>
+    </div>
+
+    <div class="demo-container">
+      <div class="demo-label">getStubConfig() default</div>
+      <div class="card-wrapper">
+        <zen-ui id="preview-card"></zen-ui>
+        <div class="config-display" id="config-display"></div>
+      </div>
+    </div>
+
+    <script type="module">
+      import '../plugin/zen-ui.ts'
+
+      const card = document.getElementById('preview-card')
+      const configDisplay = document.getElementById('config-display')
+      const themeBtn = document.getElementById('theme-toggle')
+
+      // Use getStubConfig
+      const stubConfig = {
+        card: 'heatmap',
+        entity: '',
+        title: 'Preview',
+      }
+
+      card.setConfig(stubConfig)
+      // NOT setting card.hass - this simulates preview mode
+
+      configDisplay.textContent = `type: custom:zen-ui
+card: ${stubConfig.card}
+entity: (none)
+title: ${stubConfig.title}`
+
+      themeBtn.addEventListener('click', () => {
+        document.body.classList.toggle('dark')
+      })
+    </script>
+  </body>
+</html>

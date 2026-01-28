@@ -21,6 +21,15 @@ export class ZenUI extends LitElement {
 
   static styles = [baseStyles, ...getAllCardStyles()]
 
+  static getStubConfig() {
+    return {
+      type: 'custom:zen-ui',
+      card: 'heatmap',
+      entity: '',
+      title: 'Preview',
+    }
+  }
+
   public setConfig(config: unknown): void {
     this._config = validateConfig(config)
   }
@@ -88,30 +97,86 @@ export class ZenUI extends LitElement {
     if (this.hass?.themes?.darkMode !== undefined) {
       return this.hass.themes.darkMode
     }
-    // Fallback: Check media query
-    if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) {
-      return true
-    }
-    // Fallback: Check for .dark class on body or html (for demo page)
+    // Check for .dark class on body or html (for demo/preview pages)
     if (
       document.body.classList.contains('dark') ||
       document.documentElement.classList.contains('dark')
     ) {
       return true
     }
+    // If no HA theme and no .dark class, default to light mode
+    // This ensures demo/preview pages start in light mode
+    // regardless of system preference
     return false
   }
 
   private _getRawData(): unknown {
-    if (!this._config || !this.hass) return []
+    if (!this._config) return []
 
-    const entityId = this._config.entity
-    const stateObj = this.hass.states[entityId]
+    // Try to get real entity data
+    if (this.hass) {
+      const entityId = this._config.entity
+      const stateObj = this.hass.states[entityId]
 
-    if (!stateObj) return []
+      if (stateObj) {
+        const attr = this._config.attribute || 'data'
+        const data = stateObj.attributes[attr]
+        if (data && Array.isArray(data) && data.length > 0) {
+          return data
+        }
+      }
+    }
 
-    const attr = this._config.attribute || 'data'
-    return stateObj.attributes[attr]
+    // Generate mock data for preview when no real data available
+    return this._generateMockData()
+  }
+
+  private _generateMockData(): Array<{ date: string; count: number }> {
+    const data: Array<{ date: string; count: number }> = []
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    // Simple seeded pseudo-random for deterministic results
+    const seed = 12345
+    let rand = seed
+    const random = () => {
+      rand = (rand * 1103515245 + 12345) & 0x7fffffff
+      return rand / 0x7fffffff
+    }
+
+    for (let i = 0; i < 365; i++) {
+      const date = new Date(today)
+      date.setDate(date.getDate() - i)
+
+      const weekday = date.getDay()
+      const weekNum = Math.floor(i / 7)
+
+      // Base activity varies by week (some weeks busier than others)
+      const weekActivity = Math.sin(weekNum * 0.3) * 0.3 + 0.5
+
+      // Weekdays more active than weekends
+      const dayFactor = weekday >= 1 && weekday <= 5 ? 1.0 : 0.4
+
+      // Random variation
+      const noise = random()
+
+      // Combine factors - creates values roughly 0-12
+      const value = Math.floor(noise * weekActivity * dayFactor * 15)
+
+      // Skip ~25% of days randomly for realism
+      if (random() > 0.25 && value > 0) {
+        const year = date.getFullYear()
+        const month = String(date.getMonth() + 1).padStart(2, '0')
+        const day = String(date.getDate()).padStart(2, '0')
+
+        data.push({
+          date: `${year}-${month}-${day}`,
+          count: value,
+        })
+      }
+    }
+
+    return data
   }
 
   private _getPipelineConfig(): PipelineConfig {
@@ -164,7 +229,7 @@ export class ZenUI extends LitElement {
   }
 
   render() {
-    if (!this._config || !this.hass) return html``
+    if (!this._config) return html``
 
     const renderer = getCardRenderer(this._config.card)
     const rawData = this._getRawData()

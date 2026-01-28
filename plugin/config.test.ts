@@ -26,13 +26,12 @@ describe('validateConfig', () => {
       expect(() => validateConfig({ card: 'heatmap' })).toThrow()
     })
 
-    it('throws if entity is empty string', () => {
-      expect(() => validateConfig({ card: 'heatmap', entity: '' })).toThrow(
-        'You need to define an entity',
-      )
-      expect(() => validateConfig({ card: 'heatmap', entity: '   ' })).toThrow(
-        'You need to define an entity',
-      )
+    it('allows empty entity for preview mode', () => {
+      const config = validateConfig({ card: 'heatmap', entity: '' })
+      expect(config.entity).toBe('')
+
+      const configWithSpaces = validateConfig({ card: 'heatmap', entity: '   ' })
+      expect(configWithSpaces.entity).toBe('')
     })
 
     it('throws if card is missing', () => {
