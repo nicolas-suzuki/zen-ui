@@ -18,7 +18,8 @@ export const heatmapStyles = css`
   svg {
     width: 100%;
     max-width: 800px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial,
+    font-family:
+      -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial,
       sans-serif;
   }
 
@@ -41,8 +42,9 @@ export const heatmapStyles = css`
     font-weight: 500;
     color: var(--secondary-text-color);
     margin-top: 4px;
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI',
-      Roboto, sans-serif;
+    font-family:
+      -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto,
+      sans-serif;
   }
 
   .legend span {
@@ -70,8 +72,9 @@ export const heatmapStyles = css`
     color: var(--secondary-text-color);
     margin-bottom: 6px;
     margin-left: 30px;
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI',
-      Roboto, sans-serif;
+    font-family:
+      -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto,
+      sans-serif;
     letter-spacing: -0.01em;
   }
 `

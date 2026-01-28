@@ -5,9 +5,10 @@
 A collection of beautiful visualization cards for Home Assistant. Track habits, activities, workouts, or any daily metrics with clean, customizable visualizations.
 
 **Available Cards:**
+
 - **Heatmap** — GitHub-style contribution calendar (default)
 
-[![CI](https://github.com/stomar/zen-ui/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/stomar/zen-ui/actions/workflows/ci.yml) [![Stars](https://img.shields.io/github/stars/stomar/zen-ui)](#) [![Last commit](https://img.shields.io/github/last-commit/stomar/zen-ui)](#) ![Light Mode](https://img.shields.io/badge/Light%20Mode-supported-brightgreen) ![Dark Mode](https://img.shields.io/badge/Dark%20Mode-supported-blueviolet)
+[![CI](https://github.com/shashanktomar/zen-ui/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/shashanktomar/zen-ui/actions/workflows/ci.yml) [![Stars](https://img.shields.io/github/stars/shashanktomar/zen-ui)](#) [![Last commit](https://img.shields.io/github/last-commit/shashanktomar/zen-ui)](#) ![Light Mode](https://img.shields.io/badge/Light%20Mode-supported-brightgreen) ![Dark Mode](https://img.shields.io/badge/Dark%20Mode-supported-blueviolet)
 
 <br>
 
@@ -79,20 +80,20 @@ entity: sensor.your_sensor
 
 <br>
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `entity` | string | **Required** | Entity ID that contains your data |
-| `card` | string | **Required** | Card type: `heatmap` |
-| `title` | string | — | Card title displayed at the top |
-| `attribute` | string | `data` | Entity attribute containing the data array |
-| `range` | string | `rolling` | `rolling` (last 365 days) or `year` (calendar years) |
-| `years` | number | `1` | Number of years to display (only for `range: year`) |
-| `baseColor` | string | `#40c463` | Base color for the heatmap (hex format) |
-| `backgroundColor` | string | — | Custom card background color |
-| `levelCount` | number | `5` | Number of intensity levels (2-10) |
-| `levelThresholds` | number[] | — | Custom percentile thresholds (must have `levelCount - 1` values) |
-| `weekStartDay` | string | `monday` | First day of week: `monday`, `mon`, `sunday`, or `sun` |
-| `show_legend` | boolean | `true` | Show the Less/More legend |
+| Option            | Type     | Default      | Description                                                      |
+| ----------------- | -------- | ------------ | ---------------------------------------------------------------- |
+| `entity`          | string   | **Required** | Entity ID that contains your data                                |
+| `card`            | string   | **Required** | Card type: `heatmap`                                             |
+| `title`           | string   | —            | Card title displayed at the top                                  |
+| `attribute`       | string   | `data`       | Entity attribute containing the data array                       |
+| `range`           | string   | `rolling`    | `rolling` (last 365 days) or `year` (calendar years)             |
+| `years`           | number   | `1`          | Number of years to display (only for `range: year`)              |
+| `baseColor`       | string   | `#40c463`    | Base color for the heatmap (hex format)                          |
+| `backgroundColor` | string   | —            | Custom card background color                                     |
+| `levelCount`      | number   | `5`          | Number of intensity levels (2-10)                                |
+| `levelThresholds` | number[] | —            | Custom percentile thresholds (must have `levelCount - 1` values) |
+| `weekStartDay`    | string   | `monday`     | First day of week: `monday`, `mon`, `sunday`, or `sun`           |
+| `show_legend`     | boolean  | `true`       | Show the Less/More legend                                        |
 
 </details>
 
@@ -148,7 +149,7 @@ card: heatmap
 entity: sensor.meditation
 title: Meditation Streak
 levelCount: 2
-baseColor: "#c6a0f6"
+baseColor: '#c6a0f6'
 ```
 
 </details>
@@ -164,7 +165,7 @@ type: custom:zen-ui
 card: heatmap
 entity: sensor.meditation_minutes
 title: Meditation
-baseColor: "#e91e8c"
+baseColor: '#e91e8c'
 ```
 
 </details>
@@ -180,8 +181,8 @@ type: custom:zen-ui
 card: heatmap
 entity: sensor.sleep
 title: Sleep Tracker
-baseColor: "#e91e8c"
-backgroundColor: "#1a1a2e"
+baseColor: '#e91e8c'
+backgroundColor: '#1a1a2e'
 ```
 
 </details>
@@ -259,10 +260,10 @@ Your sensor's attribute (default: `data`) should contain an array of objects:
 
 <br>
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `date` | string | ISO date string (YYYY-MM-DD) |
-| `count` | number | Numeric value for that day |
+| Field   | Type   | Description                  |
+| ------- | ------ | ---------------------------- |
+| `date`  | string | ISO date string (YYYY-MM-DD) |
+| `count` | number | Numeric value for that day   |
 
 Days without entries are treated as zero.
 

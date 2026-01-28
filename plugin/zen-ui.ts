@@ -2,11 +2,7 @@ import { LitElement, html } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { processHeatmapData, type PipelineConfig } from './data-pipeline'
 import { generateColorScale } from './color-utils'
-import {
-  validateConfig,
-  weekStartDayToNumber,
-  type CardConfig,
-} from './config'
+import { validateConfig, weekStartDayToNumber, type CardConfig } from './config'
 import { baseStyles } from './shared/styles'
 import { getCardRenderer, getAllCardStyles } from './cards/registry'
 import type { Tooltip, CardRenderContext } from './cards/types'

@@ -62,8 +62,9 @@ export const baseStyles = css`
     margin-bottom: 20px;
     color: var(--primary-text-color);
     text-align: left;
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI',
-      Roboto, sans-serif;
+    font-family:
+      -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto,
+      sans-serif;
   }
 
   .tooltip {
@@ -73,8 +74,9 @@ export const baseStyles = css`
     color: var(--ha-card-background);
     border-radius: 8px;
     font-size: 12px;
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI',
-      Roboto, sans-serif;
+    font-family:
+      -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto,
+      sans-serif;
     pointer-events: none;
     z-index: 1000;
     white-space: nowrap;

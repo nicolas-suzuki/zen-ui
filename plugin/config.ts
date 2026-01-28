@@ -80,7 +80,12 @@ const YearsSchema = v.pipe(
 const LevelCountSchema = v.pipe(
   v.unknown(),
   v.transform((input) => {
-    if (typeof input === 'number' && Number.isInteger(input) && input >= 2 && input <= 10) {
+    if (
+      typeof input === 'number' &&
+      Number.isInteger(input) &&
+      input >= 2 &&
+      input <= 10
+    ) {
       return input
     }
     return CONFIG_DEFAULTS.levelCount

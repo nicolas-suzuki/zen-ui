@@ -90,7 +90,8 @@ export function renderYearGraph(
                 <g transform="translate(${wIndex * STEP}, 0)">
                     ${week.map((day, dIndex) => {
                       const color =
-                        colorScale[day.level] ?? colorScale[colorScale.length - 1]
+                        colorScale[day.level] ??
+                        colorScale[colorScale.length - 1]
                       return svg`
                             <rect
                                 width="${RECT_SIZE}"
