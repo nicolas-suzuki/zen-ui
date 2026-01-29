@@ -125,6 +125,8 @@ baseColor: '#e91e8c'
 
 **Custom Background**
 
+![Heatmap Dark Theme](images/heatmap-dark-theme.png)
+
 ```yaml
 type: custom:zen-ui
 card: heatmap
