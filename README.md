@@ -91,6 +91,8 @@ title: Activity
 
 Display multiple calendar years stacked vertically:
 
+![Heatmap Multiple Years](images/heatmap-multiple-years.png)
+
 ```yaml
 type: custom:zen-ui
 card: heatmap
@@ -103,6 +105,8 @@ years: 2
 **Binary/Streak Tracking**
 
 For simple yes/no tracking (did I do it today?), use `levelCount: 2`:
+
+![Heatmap Binary](images/heatmap-binary.png)
 
 ```yaml
 type: custom:zen-ui
@@ -124,6 +128,8 @@ baseColor: '#e91e8c'
 ```
 
 **Custom Background**
+
+![Heatmap Custom Background](images/heatmap-custom-background.png)
 
 ```yaml
 type: custom:zen-ui
