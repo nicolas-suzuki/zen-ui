@@ -6,15 +6,11 @@
 
 A collection of beautiful visualization cards for Home Assistant. Track habits, activities, workouts, or any daily metrics with clean, customizable visualizations.
 
-**Available Cards:**
-
-- **Heatmap** — GitHub-style contribution calendar
-
 <br>
 
 ## Table of Contents
 
-**[`Installation`](#installation)** **[`Configuration`](#configuration)** **[`Examples`](#examples)** **[`Data Format`](#data-format)** **[`Development`](#development)**
+**[`Installation`](#installation)** **[`Cards`](#cards)** **[`Data Format`](#data-format)** **[`Development`](#development)**
 
 <br>
 
@@ -51,19 +47,22 @@ A collection of beautiful visualization cards for Home Assistant. Track habits, 
 
 <br>
 
-## Configuration
+## Cards
 
-Add the card to your dashboard using the UI or YAML:
+### Heatmap
+
+GitHub-style contribution calendar for visualizing daily metrics.
 
 ```yaml
 type: custom:zen-ui
 card: heatmap
 entity: sensor.your_sensor
+title: Activity
 ```
 
 <details>
 
-<summary><b>All Configuration Options</b></summary>
+<summary><b>Configuration Options</b></summary>
 
 <br>
 
@@ -84,30 +83,13 @@ entity: sensor.your_sensor
 
 </details>
 
-<br>
-
-## Examples
-
 <details>
 
-<summary><b>Basic Usage</b></summary>
+<summary><b>Examples</b></summary>
 
 <br>
 
-```yaml
-type: custom:zen-ui
-card: heatmap
-entity: sensor.daily_steps
-title: Daily Steps
-```
-
-</details>
-
-<details>
-
-<summary><b>Multi-Year Calendar View</b></summary>
-
-<br>
+**Multi-Year Calendar View**
 
 Display multiple calendar years stacked vertically:
 
@@ -120,13 +102,7 @@ range: year
 years: 2
 ```
 
-</details>
-
-<details>
-
-<summary><b>Binary/Streak Tracking</b></summary>
-
-<br>
+**Binary/Streak Tracking**
 
 For simple yes/no tracking (did I do it today?), use `levelCount: 2`:
 
@@ -139,13 +115,7 @@ levelCount: 2
 baseColor: '#c6a0f6'
 ```
 
-</details>
-
-<details>
-
-<summary><b>Custom Color Theme</b></summary>
-
-<br>
+**Custom Color Theme**
 
 ```yaml
 type: custom:zen-ui
@@ -155,13 +125,7 @@ title: Meditation
 baseColor: '#e91e8c'
 ```
 
-</details>
-
-<details>
-
-<summary><b>Custom Background</b></summary>
-
-<br>
+**Custom Background**
 
 ```yaml
 type: custom:zen-ui
@@ -172,13 +136,7 @@ baseColor: '#e91e8c'
 backgroundColor: '#1a1a2e'
 ```
 
-</details>
-
-<details>
-
-<summary><b>More Granular Levels</b></summary>
-
-<br>
+**More Granular Levels**
 
 Increase intensity levels for more nuanced visualization:
 
@@ -190,13 +148,7 @@ title: Code Commits
 levelCount: 8
 ```
 
-</details>
-
-<details>
-
-<summary><b>Custom Thresholds</b></summary>
-
-<br>
+**Custom Thresholds**
 
 Define your own percentile thresholds for level boundaries:
 
@@ -209,13 +161,7 @@ levelCount: 5
 levelThresholds: [10, 30, 60, 90]
 ```
 
-</details>
-
-<details>
-
-<summary><b>Week Starting on Sunday</b></summary>
-
-<br>
+**Week Starting on Sunday**
 
 ```yaml
 type: custom:zen-ui
@@ -294,6 +240,11 @@ plugin/                      # Home Assistant plugin source
 ├── config.ts                # Configuration validation
 ├── data-pipeline.ts         # Data processing logic
 ├── color-utils.ts           # HSL color generation
+├── data-sources/            # Data fetching from HA
+│   ├── types.ts
+│   ├── statistics.ts
+│   ├── history.ts
+│   └── attribute.ts
 ├── cards/                   # Card type implementations
 │   ├── types.ts             # CardRenderer interface
 │   ├── registry.ts          # Card type registry
