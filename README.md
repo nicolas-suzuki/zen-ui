@@ -53,6 +53,8 @@ A collection of beautiful visualization cards for Home Assistant. Track habits, 
 
 GitHub-style contribution calendar for visualizing daily metrics.
 
+![Heatmap Default](https://private-user-images.githubusercontent.com/2309241/541975728-76bee036-18b4-49da-9aca-e8b145bf4a75.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Njk2NTQ2MTIsIm5iZiI6MTc2OTY1NDMxMiwicGF0aCI6Ii8yMzA5MjQxLzU0MTk3NTcyOC03NmJlZTAzNi0xOGI0LTQ5ZGEtOWFjYS1lOGIxNDViZjRhNzUucG5nP1gtQW16LUFsZ29yaXRobT1BV1M0LUhNQUMtU0hBMjU2JlgtQW16LUNyZWRlbnRpYWw9QUtJQVZDT0RZTFNBNTNQUUs0WkElMkYyMDI2MDEyOSUyRnVzLWVhc3QtMSUyRnMzJTJGYXdzNF9yZXF1ZXN0JlgtQW16LURhdGU9MjAyNjAxMjlUMDIzODMyWiZYLUFtei1FeHBpcmVzPTMwMCZYLUFtei1TaWduYXR1cmU9YzRhNDg2NTA3NzU5ZTlhYmUxZTZjYjlmMzU4N2I3YjY5NDIxNGI0MDA3ZTJiNzhmYzg4MTMzNThiYTRjNGU5ZCZYLUFtei1TaWduZWRIZWFkZXJzPWhvc3QifQ.Bhlx6XVn6vw2Lh0a5Phi5QzJQYYUzeNwojsYSeYm3SY)
+
 ```yaml
 type: custom:zen-ui
 card: heatmap
@@ -83,11 +85,7 @@ title: Activity
 
 </details>
 
-<details>
-
-<summary><b>Examples</b></summary>
-
-<br>
+#### Examples
 
 **Multi-Year Calendar View**
 
@@ -170,8 +168,6 @@ entity: sensor.habits
 title: Habit Tracker
 weekStartDay: sunday
 ```
-
-</details>
 
 <br>
 
