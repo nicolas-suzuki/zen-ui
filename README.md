@@ -10,7 +10,7 @@ A collection of beautiful visualization cards for Home Assistant. Track habits, 
 
 ## Table of Contents
 
-**[`Installation`](#installation)** **[`Cards`](#cards)** **[`Data Format`](#data-format)** **[`Development`](#development)**
+**[`Installation`](#installation)** **[`Cards`](#cards)** **[`Development`](#development)**
 
 <br>
 
@@ -170,35 +170,6 @@ entity: sensor.habits
 title: Habit Tracker
 weekStartDay: sunday
 ```
-
-</details>
-
-<br>
-
-## Data Format
-
-Your sensor's attribute (default: `data`) should contain an array of objects:
-
-```json
-[
-  { "date": "2024-01-15", "count": 5 },
-  { "date": "2024-01-16", "count": 12 },
-  { "date": "2024-01-17", "count": 3 }
-]
-```
-
-<details>
-
-<summary><b>Field Details</b></summary>
-
-<br>
-
-| Field   | Type   | Description                  |
-| ------- | ------ | ---------------------------- |
-| `date`  | string | ISO date string (YYYY-MM-DD) |
-| `count` | number | Numeric value for that day   |
-
-Days without entries are treated as zero.
 
 </details>
 
