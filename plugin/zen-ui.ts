@@ -23,6 +23,28 @@ console.info(
   'color: #ea76cb; background: #5c5f77; font-weight: bold; padding: 2px 4px; border-radius: 0 4px 4px 0;',
 )
 
+// Register with Home Assistant card picker
+declare global {
+  interface Window {
+    customCards?: Array<{
+      type: string
+      name: string
+      description?: string
+      preview?: boolean
+      documentationURL?: string
+    }>
+  }
+}
+
+window.customCards = window.customCards || []
+window.customCards.push({
+  type: 'zen-ui',
+  name: 'Zen UI',
+  description: 'GitHub-style contribution heatmap for tracking daily metrics',
+  preview: true,
+  documentationURL: 'https://github.com/stormari/zen-ui',
+})
+
 @customElement('zen-ui')
 export class ZenUI extends LitElement {
   @property({ attribute: false }) public hass?: Hass
