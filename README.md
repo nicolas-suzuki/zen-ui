@@ -136,6 +136,10 @@ Automatically adapts to Home Assistant's dark mode.
 
 ![Heatmap Dark Theme](images/heatmap-dark-theme.png)
 
+**HA Screenshot**
+
+![Heatmap HA Screenshot](images/heatmap-ha-screenshot.png)
+
 **More Granular Levels**
 
 Increase intensity levels for more nuanced visualization:
