@@ -117,16 +117,6 @@ levelCount: 2
 baseColor: '#c6a0f6'
 ```
 
-**Custom Color Theme**
-
-```yaml
-type: custom:zen-ui
-card: heatmap
-entity: sensor.meditation_minutes
-title: Meditation
-baseColor: '#e91e8c'
-```
-
 **Custom Background**
 
 ![Heatmap Custom Background](images/heatmap-custom-background.png)
