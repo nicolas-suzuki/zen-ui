@@ -76,3 +76,19 @@ release version:
 [group('release')]
 release-current:
     just release "$(just version)"
+
+##############################################
+################ Local Testing ###############
+##############################################
+
+# SSH host for Home Assistant (set HA_SSH_HOST env var)
+ha_ssh_host := env('HA_SSH_HOST')
+
+# Sync built zen-ui.js to Home Assistant for local testing
+[group('local-testing')]
+sync:
+    rsync -v --rsync-path="sudo rsync" dist/zen-ui.js {{ha_ssh_host}}:/homeassistant/www/community/zen-ui/
+
+# Build and sync to Home Assistant
+[group('local-testing')]
+sync-build: build sync

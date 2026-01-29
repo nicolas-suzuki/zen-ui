@@ -103,4 +103,17 @@ export const baseStyles = css`
     opacity: 0.8;
     font-weight: 500;
   }
+
+  .loading,
+  .error,
+  .empty {
+    padding: 20px;
+    text-align: center;
+    color: var(--secondary-text-color);
+    font-size: 14px;
+  }
+
+  .error {
+    color: #d32f2f;
+  }
 `

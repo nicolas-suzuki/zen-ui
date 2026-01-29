@@ -103,6 +103,18 @@ const BaseColorSchema = v.pipe(
   }),
 )
 
+// Schema for grid_options (HA sections view)
+const GridOptionsSchema = v.optional(
+  v.object({
+    columns: v.optional(v.union([v.number(), v.literal('full')])),
+    min_columns: v.optional(v.number()),
+    max_columns: v.optional(v.number()),
+    rows: v.optional(v.number()),
+    min_rows: v.optional(v.number()),
+    max_rows: v.optional(v.number()),
+  }),
+)
+
 // Main config schema (keeping name for backward compatibility)
 const HeatmapConfigSchema = v.pipe(
   v.object({
@@ -124,6 +136,7 @@ const HeatmapConfigSchema = v.pipe(
     levelThresholds: v.optional(v.array(v.number())),
     baseColor: v.optional(BaseColorSchema, CONFIG_DEFAULTS.baseColor),
     backgroundColor: v.optional(v.string()),
+    grid_options: GridOptionsSchema,
   }),
   // Cross-field validation for levelThresholds
   v.transform((config) => {

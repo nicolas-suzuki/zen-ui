@@ -6,18 +6,37 @@ import { validateConfig, weekStartDayToNumber, type CardConfig } from './config'
 import { baseStyles } from './shared/styles'
 import { getCardRenderer, getAllCardStyles } from './cards/registry'
 import type { Tooltip, CardRenderContext } from './cards/types'
+import {
+  fetchStatistics,
+  aggregateStatistics,
+  getAttributeData,
+  type DataPoint,
+  type Hass,
+} from './data-sources'
+
+// Injected by Vite at build time from package.json
+declare const __VERSION__: string
+
+console.info(
+  `%c ZEN-UI %c ${__VERSION__} `,
+  'color: #5c5f77; background: #ea76cb; font-weight: bold; padding: 2px 4px; border-radius: 4px 0 0 4px;',
+  'color: #ea76cb; background: #5c5f77; font-weight: bold; padding: 2px 4px; border-radius: 0 4px 4px 0;',
+)
 
 @customElement('zen-ui')
 export class ZenUI extends LitElement {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  @property({ attribute: false }) public hass?: any
+  @property({ attribute: false }) public hass?: Hass
 
   @state() private _config?: CardConfig
   @state() private _darkMode = false
   @state() private _tooltip?: Tooltip
+  @state() private _historyData: DataPoint[] = []
+  @state() private _loading = false
+  @state() private _error?: string
 
   private _darkModeMediaQuery?: MediaQueryList
   private _darkModeObserver?: MutationObserver
+  private _lastFetchedEntity?: string
 
   static styles = [baseStyles, ...getAllCardStyles()]
 
@@ -40,9 +59,18 @@ export class ZenUI extends LitElement {
     return renderer.getCardSize(this._config)
   }
 
+  public getGridOptions() {
+    return {
+      columns: this._config?.grid_options?.columns ?? 'full',
+      min_columns: this._config?.grid_options?.min_columns ?? 6,
+      min_rows: this._config?.grid_options?.min_rows ?? 2,
+    }
+  }
+
   updated(changedProps: Map<string, unknown>): void {
     if (changedProps.has('hass')) {
       this._updateDarkMode()
+      this._fetchHistoryIfNeeded()
     }
   }
 
@@ -110,28 +138,94 @@ export class ZenUI extends LitElement {
     return false
   }
 
-  private _getRawData(): unknown {
+  private _fetchHistoryIfNeeded(): void {
+    if (!this._config?.entity || !this.hass) return
+
+    // Only fetch if entity changed
+    if (this._lastFetchedEntity === this._config.entity) return
+
+    this._lastFetchedEntity = this._config.entity
+    this._fetchStatistics()
+  }
+
+  private async _fetchStatistics(): Promise<void> {
+    if (!this._config?.entity || !this.hass) return
+
+    // Skip if hass.callWS is not available (e.g., demo mode)
+    if (typeof this.hass.callWS !== 'function') return
+
+    this._loading = true
+    this._error = undefined
+
+    try {
+      const endDate = new Date()
+      const startDate = new Date()
+      startDate.setFullYear(startDate.getFullYear() - 1)
+
+      // Use statistics API for long-term data (not limited by purge_keep_days)
+      const statistics = await fetchStatistics(this.hass, {
+        entityId: this._config.entity,
+        startDate,
+        endDate,
+        period: 'day',
+      })
+
+      // Pick statistics type based on sensor's state_class
+      const statisticsType = this._getStatisticsType()
+      this._historyData = aggregateStatistics(statistics, statisticsType)
+    } catch (err) {
+      console.error('Failed to fetch statistics:', err)
+      this._error = 'Failed to load statistics data'
+      this._historyData = []
+    } finally {
+      this._loading = false
+    }
+  }
+
+  private _getStatisticsType(): 'max' | 'mean' | 'change' | 'state' {
+    if (!this._config?.entity || !this.hass) return 'max'
+
+    const stateObj = this.hass.states[this._config.entity]
+    const stateClass = stateObj?.attributes?.state_class
+
+    // state_class: total or total_increasing → use 'change' (daily delta)
+    // state_class: measurement → use 'max'
+    if (stateClass === 'total' || stateClass === 'total_increasing') {
+      return 'change'
+    }
+
+    return 'max'
+  }
+
+  private _getRawData(): DataPoint[] {
     if (!this._config) return []
 
-    // Try to get real entity data
-    if (this.hass) {
-      const entityId = this._config.entity
-      const stateObj = this.hass.states[entityId]
+    // Preview mode: no entity configured, generate mock data
+    if (!this._config.entity) {
+      return this._generateMockData()
+    }
 
-      if (stateObj) {
-        const attr = this._config.attribute || 'data'
-        const data = stateObj.attributes[attr]
-        if (data && Array.isArray(data) && data.length > 0) {
-          return data
-        }
+    // Check for data in entity attribute first (for custom sensors with data attribute)
+    if (this.hass) {
+      const attributeData = getAttributeData(this.hass, {
+        entityId: this._config.entity,
+        attribute: this._config.attribute || 'data',
+      })
+      if (attributeData.length > 0) {
+        return attributeData
       }
     }
 
-    // Generate mock data for preview when no real data available
-    return this._generateMockData()
+    // Use fetched history data
+    if (this._historyData.length > 0) {
+      return this._historyData
+    }
+
+    // No data available
+    return []
   }
 
-  private _generateMockData(): Array<{ date: string; count: number }> {
+  private _generateMockData(): DataPoint[] {
     const data: Array<{ date: string; count: number }> = []
     const today = new Date()
     today.setHours(0, 0, 0, 0)
@@ -231,13 +325,50 @@ export class ZenUI extends LitElement {
   render() {
     if (!this._config) return html``
 
+    const cardStyle = this._config.backgroundColor
+      ? `background-color: ${this._config.backgroundColor};`
+      : ''
+
+    // Show loading state
+    if (this._loading) {
+      return html`
+        <ha-card style="${cardStyle}">
+          ${this._config.title
+            ? html`<div class="header">${this._config.title}</div>`
+            : ''}
+          <div class="loading">Loading history...</div>
+        </ha-card>
+      `
+    }
+
+    // Show error state
+    if (this._error) {
+      return html`
+        <ha-card style="${cardStyle}">
+          ${this._config.title
+            ? html`<div class="header">${this._config.title}</div>`
+            : ''}
+          <div class="error">${this._error}</div>
+        </ha-card>
+      `
+    }
+
     const renderer = getCardRenderer(this._config.card)
     const rawData = this._getRawData()
     const pipelineConfig = this._getPipelineConfig()
     const data = processHeatmapData(pipelineConfig, rawData)
     const colorScale = this._getColorScale()
 
-    if (data.length === 0) return html``
+    if (data.length === 0) {
+      return html`
+        <ha-card style="${cardStyle}">
+          ${this._config.title
+            ? html`<div class="header">${this._config.title}</div>`
+            : ''}
+          <div class="empty">No data available</div>
+        </ha-card>
+      `
+    }
 
     const context: CardRenderContext = {
       config: this._config,
@@ -248,10 +379,6 @@ export class ZenUI extends LitElement {
       onCellMouseEnter: this._onCellMouseEnter,
       onCellMouseLeave: this._onCellMouseLeave,
     }
-
-    const cardStyle = this._config.backgroundColor
-      ? `background-color: ${this._config.backgroundColor};`
-      : ''
 
     return html`
       <ha-card style="${cardStyle}">
@@ -269,7 +396,7 @@ export class ZenUI extends LitElement {
               <div class="tooltip-date">
                 ${this._formatTooltipDate(this._tooltip.date)}
               </div>
-              <div class="tooltip-count">${this._tooltip.count}</div>
+              <div class="tooltip-count">${this._tooltip.count.toFixed(2)}</div>
             </div>
           `
         : ''}

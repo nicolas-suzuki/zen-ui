@@ -30,7 +30,10 @@ describe('validateConfig', () => {
       const config = validateConfig({ card: 'heatmap', entity: '' })
       expect(config.entity).toBe('')
 
-      const configWithSpaces = validateConfig({ card: 'heatmap', entity: '   ' })
+      const configWithSpaces = validateConfig({
+        card: 'heatmap',
+        entity: '   ',
+      })
       expect(configWithSpaces.entity).toBe('')
     })
 

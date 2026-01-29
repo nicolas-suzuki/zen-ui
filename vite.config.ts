@@ -1,7 +1,11 @@
 import { defineConfig } from 'vite'
+import pkg from './package.json'
 
 export default defineConfig({
   root: 'web',
+  define: {
+    __VERSION__: JSON.stringify(pkg.version),
+  },
   build: {
     lib: {
       entry: '../plugin/zen-ui.ts',

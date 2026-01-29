@@ -10,14 +10,13 @@ export const heatmapStyles = css`
   .graph-container {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
+    align-items: center;
     width: 100%;
     overflow-x: auto;
   }
 
   svg {
     width: 100%;
-    max-width: 800px;
     font-family:
       -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial,
       sans-serif;
@@ -37,6 +36,7 @@ export const heatmapStyles = css`
   .legend {
     display: flex;
     align-items: center;
+    align-self: flex-end;
     gap: 3px;
     font-size: 11px;
     font-weight: 500;
@@ -52,8 +52,8 @@ export const heatmapStyles = css`
   }
 
   .legend-item {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
     border-radius: 2px;
   }
 
