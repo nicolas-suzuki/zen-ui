@@ -125,8 +125,6 @@ baseColor: '#e91e8c'
 
 **Custom Background**
 
-![Heatmap Dark Theme](images/heatmap-dark-theme.png)
-
 ```yaml
 type: custom:zen-ui
 card: heatmap
@@ -135,6 +133,12 @@ title: Sleep Tracker
 baseColor: '#e91e8c'
 backgroundColor: '#1a1a2e'
 ```
+
+**Dark Theme**
+
+Automatically adapts to Home Assistant's dark mode.
+
+![Heatmap Dark Theme](images/heatmap-dark-theme.png)
 
 **More Granular Levels**
 
