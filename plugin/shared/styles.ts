@@ -10,8 +10,6 @@ export const baseStyles = css`
   :host {
     display: block;
     --ha-card-background: var(--card-background-color, #fff);
-    --primary-text-color: var(--primary-text-color, #24292f);
-    --secondary-text-color: var(--secondary-text-color, #57606a);
 
     /* Default GitHub Light Theme Colors */
     --gh-c-0: #ebedf0;
@@ -23,8 +21,6 @@ export const baseStyles = css`
 
   @media (prefers-color-scheme: dark) {
     :host {
-      --primary-text-color: #c9d1d9;
-      --secondary-text-color: #8b949e;
       --gh-c-0: #161b22;
       --gh-c-1: #0e4429;
       --gh-c-2: #006d32;
@@ -36,8 +32,6 @@ export const baseStyles = css`
   /* Support class-based or attribute-based dark mode (e.g. from HA or Demo) */
   :host-context(.dark),
   :host-context([dark]) {
-    --primary-text-color: #c9d1d9;
-    --secondary-text-color: #8b949e;
     --gh-c-0: #161b22;
     --gh-c-1: #0e4429;
     --gh-c-2: #006d32;

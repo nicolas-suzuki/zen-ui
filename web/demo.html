@@ -69,19 +69,6 @@
         color: #8b949e;
       }
 
-      .card-wrapper {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-      }
-
-      body.dark .card-wrapper {
-        background: #0d1117;
-        border: 1px solid #30363d;
-        box-shadow: none;
-      }
-
       .config-display {
         border-top: 1px solid #e1e4e8;
         padding: 12px 16px;
@@ -90,32 +77,31 @@
         color: #57606a;
         white-space: pre;
         overflow-x: auto;
+        background: white;
+        border-radius: 0 0 12px 12px;
       }
 
       body.dark .config-display {
         border-top-color: #30363d;
         color: #8b949e;
+        background: #161b22;
       }
 
-      /* Override ha-card styles to remove its own background */
-      .card-wrapper ha-card {
-        box-shadow: none;
-        border-radius: 0;
-      }
-
-      body.dark .card-wrapper ha-card {
-        border: none;
-      }
-
-      /* Apply CSS vars for the card */
-      zen-ui {
+      /* HA theme variables - mimics what Home Assistant provides */
+      :root {
+        --ha-card-background: white;
+        --ha-card-border-radius: 12px;
+        --ha-card-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         --card-background-color: white;
         --primary-text-color: #24292f;
         --secondary-text-color: #57606a;
       }
 
-      body.dark zen-ui {
-        --card-background-color: #0d1117;
+      body.dark {
+        --ha-card-background: #1c1c1c;
+        --ha-card-border-radius: 12px;
+        --ha-card-box-shadow: none;
+        --card-background-color: #1c1c1c;
         --primary-text-color: #c9d1d9;
         --secondary-text-color: #8b949e;
       }
@@ -134,48 +120,33 @@
 
     <div class="demo-container">
       <div class="demo-label">Rolling (default)</div>
-      <div class="card-wrapper">
-        <zen-ui id="card-rolling"></zen-ui>
-        <div class="config-display" id="config-rolling"></div>
-      </div>
+      <zen-ui id="card-rolling"></zen-ui>
+      <div class="config-display" id="config-rolling"></div>
     </div>
 
     <div class="demo-container">
       <div class="demo-label">Calendar Year - 2 years</div>
-      <div class="card-wrapper">
-        <zen-ui id="card-multiyear"></zen-ui>
-        <div class="config-display" id="config-multiyear"></div>
-      </div>
+      <zen-ui id="card-multiyear"></zen-ui>
+      <div class="config-display" id="config-multiyear"></div>
     </div>
 
     <div class="demo-container">
       <div class="demo-label">Binary Data (levelCount: 2)</div>
-      <div class="card-wrapper">
-        <zen-ui id="card-binary"></zen-ui>
-        <div class="config-display" id="config-binary"></div>
-      </div>
+      <zen-ui id="card-binary"></zen-ui>
+      <div class="config-display" id="config-binary"></div>
     </div>
 
     <div class="demo-container">
       <div class="demo-label">Custom Theme</div>
+      <zen-ui
+        id="card-themed"
+        style="--primary-text-color: #e8e8e8; --secondary-text-color: #7f8ea3"
+      ></zen-ui>
       <div
-        class="card-wrapper"
-        style="background: transparent; box-shadow: none"
-      >
-        <zen-ui
-          id="card-themed"
-          style="--primary-text-color: #e8e8e8; --secondary-text-color: #7f8ea3"
-        ></zen-ui>
-        <div
-          class="config-display"
-          style="
-            border-top-color: #2d2d44;
-            color: #7f8ea3;
-            background: #1a1a2e;
-            border-radius: 0 0 12px 12px;
-          "
-        ></div>
-      </div>
+        class="config-display"
+        id="config-themed"
+        style="border-top-color: #2d2d44; color: #7f8ea3; background: #1a1a2e"
+      ></div>
     </div>
 
     <script type="module">
@@ -188,8 +159,7 @@
       const configRolling = document.getElementById('config-rolling')
       const configMultiyear = document.getElementById('config-multiyear')
       const configBinary = document.getElementById('config-binary')
-      const configThemed =
-        cardThemed.parentElement.querySelector('.config-display')
+      const configThemed = document.getElementById('config-themed')
       const themeBtn = document.getElementById('theme-toggle')
       const regenBtn = document.getElementById('regen-data')
 
