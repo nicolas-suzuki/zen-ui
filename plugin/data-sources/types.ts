@@ -32,6 +32,9 @@ export interface Hass {
   themes?: {
     darkMode?: boolean
   }
+  locale?: {
+    language: string
+  }
 }
 
 // Data source result
