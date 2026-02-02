@@ -85,6 +85,51 @@ title: Activity
 
 </details>
 
+<details>
+
+<summary><b>Data Sources</b></summary>
+
+<br>
+
+The card supports two data sources:
+
+**1. Statistics API (Recommended)**
+
+Works automatically with any sensor that has `state_class` defined (`measurement`, `total`, or `total_increasing`). Home Assistant records long-term statistics for these sensors.
+
+```yaml
+# Just point to your sensor - no extra setup needed
+entity: sensor.daily_steps
+```
+
+To check if your sensor supports statistics, go to **Developer Tools** → **States** and look for the `state_class` attribute.
+
+**2. Custom Attribute Data**
+
+For sensors without `state_class`, or if you want full control over the data, store an array of `{date, count}` objects in an entity attribute:
+
+```yaml
+entity: sensor.my_custom_tracker
+attribute: data  # default attribute name
+```
+
+The attribute should contain:
+```json
+[
+  {"date": "2024-01-15", "count": 5},
+  {"date": "2024-01-16", "count": 3}
+]
+```
+
+**Troubleshooting "No data available"**
+
+If you see this message:
+1. Check that your sensor has `state_class` defined, OR
+2. Ensure your sensor has a `data` attribute with the correct format
+3. Verify the entity ID is correct in Developer Tools → States
+
+</details>
+
 #### Examples
 
 **Multi-Year Calendar View**
@@ -127,7 +172,7 @@ card: heatmap
 entity: sensor.sleep
 title: Sleep Tracker
 baseColor: '#e91e8c'
-backgroundColor: '#1a1a2e'
+backgroundColor: '#fff5f8'
 ```
 
 **Dark Theme**
