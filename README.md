@@ -110,20 +110,22 @@ For sensors without `state_class`, or if you want full control over the data, st
 
 ```yaml
 entity: sensor.my_custom_tracker
-attribute: data  # default attribute name
+attribute: data # default attribute name
 ```
 
 The attribute should contain:
+
 ```json
 [
-  {"date": "2024-01-15", "count": 5},
-  {"date": "2024-01-16", "count": 3}
+  { "date": "2024-01-15", "count": 5 },
+  { "date": "2024-01-16", "count": 3 }
 ]
 ```
 
 **Troubleshooting "No data available"**
 
 If you see this message:
+
 1. Check that your sensor has `state_class` defined, OR
 2. Ensure your sensor has a `data` attribute with the correct format
 3. Verify the entity ID is correct in Developer Tools → States
