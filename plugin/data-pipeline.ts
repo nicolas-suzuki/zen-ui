@@ -189,13 +189,8 @@ export function calculateDateRanges(
     const daysToSubtract = (startDow - weekStart + 7) % 7
     startDate = addDays(startDate, -daysToSubtract)
 
-    // Adjust endDate forward to weekEnd day (day before next weekStart)
-    const endDow = getDayOfWeek(endDate)
-    const weekEnd = (weekStart + 6) % 7
-    const daysToAdd = (weekEnd - endDow + 7) % 7
-    const adjustedEndDate = addDays(endDate, daysToAdd)
-
-    return [{ startDate, endDate: adjustedEndDate }]
+    // Don't extend endDate past today - avoids showing empty future day squares
+    return [{ startDate, endDate }]
   }
 
   // Fixed mode: one range per year (strict Jan 1 - Dec 31, no week boundary adjustment)

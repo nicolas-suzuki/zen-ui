@@ -7,6 +7,7 @@
 import { html, svg, type TemplateResult } from 'lit'
 import type { HeatmapData } from '../../data-pipeline'
 import type { CardRenderContext } from '../types'
+import { calculateGridPositions } from './grid'
 
 const RECT_SIZE = 10
 const GAP = 3
@@ -85,28 +86,23 @@ export function renderYearGraph(
       <svg viewBox="0 0 ${X_START + width + 5} ${Y_START + height + 2}">
         <g transform="translate(${X_START}, ${Y_START})">
           ${labels}
-          ${heatmapData.weeks.map(
-            (week, wIndex) => svg`
-                <g transform="translate(${wIndex * STEP}, 0)">
-                    ${week.map((day, dIndex) => {
-                      const color =
-                        colorScale[day.level] ??
-                        colorScale[colorScale.length - 1]
-                      return svg`
-                            <rect
-                                width="${RECT_SIZE}"
-                                height="${RECT_SIZE}"
-                                x="0"
-                                y="${dIndex * STEP}"
-                                fill="${color}"
-                                style="cursor: pointer;"
-                                @mouseenter=${(e: MouseEvent) => context.onCellMouseEnter(e, day.date, day.count)}
-                                @mouseleave=${context.onCellMouseLeave}
-                            />
-                        `
-                    })}
-                </g>
-            `,
+          ${calculateGridPositions(heatmapData.weeks.flat(), weekStart).map(
+            ({ day, row, col }) => {
+              const color =
+                colorScale[day.level] ?? colorScale[colorScale.length - 1]
+              return svg`
+                <rect
+                  width="${RECT_SIZE}"
+                  height="${RECT_SIZE}"
+                  x="${col * STEP}"
+                  y="${row * STEP}"
+                  fill="${color}"
+                  style="cursor: pointer;"
+                  @mouseenter=${(e: MouseEvent) => context.onCellMouseEnter(e, day.date, day.count)}
+                  @mouseleave=${context.onCellMouseLeave}
+                />
+              `
+            },
           )}
           ${dayLabels.map(
             ({ row, label }) => svg`

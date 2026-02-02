@@ -162,37 +162,39 @@ describe('calculateDateRanges', () => {
     expected: Array<{ start: string; end: string; label?: string }>
   }> = [
     // Rolling mode - Monday start (default)
+    // Note: endDate is NOT extended past today to avoid showing empty future day squares
     {
       name: 'rolling, Monday start, today=Sat 2024-06-15',
       config: { mode: 'rolling' },
       today: date(2024, 6, 15), // Saturday
-      expected: [{ start: '2023-06-12', end: '2024-06-16' }], // Mon to Sun
+      expected: [{ start: '2023-06-12', end: '2024-06-15' }], // Mon to today (Sat)
     },
     {
       name: 'rolling, Monday start, today=Mon 2024-06-17',
       config: { mode: 'rolling' },
       today: date(2024, 6, 17), // Monday
-      expected: [{ start: '2023-06-19', end: '2024-06-23' }], // Mon to Sun
+      expected: [{ start: '2023-06-19', end: '2024-06-17' }], // Mon to today (Mon)
     },
     {
       name: 'rolling, Monday start, today=Sun 2024-06-16',
       config: { mode: 'rolling' },
       today: date(2024, 6, 16), // Sunday
-      expected: [{ start: '2023-06-12', end: '2024-06-16' }], // Mon to Sun (June 17 2023 is Sat, adjust back to Mon June 12)
+      expected: [{ start: '2023-06-12', end: '2024-06-16' }], // Mon to today (Sun)
     },
 
     // Rolling mode - Sunday start
+    // Note: endDate is NOT extended past today to avoid showing empty future day squares
     {
       name: 'rolling, Sunday start, today=Sat 2024-06-15',
       config: { mode: 'rolling', weekStartDay: 0 },
       today: date(2024, 6, 15), // Saturday
-      expected: [{ start: '2023-06-11', end: '2024-06-15' }], // Sun to Sat (June 16 2023 is Fri, adjust back to Sun June 11)
+      expected: [{ start: '2023-06-11', end: '2024-06-15' }], // Sun to today (Sat)
     },
     {
       name: 'rolling, Sunday start, today=Sun 2024-06-16',
       config: { mode: 'rolling', weekStartDay: 0 },
       today: date(2024, 6, 16), // Sunday
-      expected: [{ start: '2023-06-18', end: '2024-06-22' }], // Sun to Sat
+      expected: [{ start: '2023-06-18', end: '2024-06-16' }], // Sun to today (Sun)
     },
 
     // Fixed mode - single year (strict Jan 1 - Dec 31, no week adjustment)
