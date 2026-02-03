@@ -612,10 +612,10 @@ describe('getLevelRange', () => {
       for (const val of testValues) {
         const levelFromGetLevel = getLevel(val, 100, 5, thresholds)
         const levelFromGetLevelRange = getLevelRange(val, 0, 100, 5, thresholds)
-        expect(levelFromGetLevelRange).toBe(
-          levelFromGetLevel,
+        expect(
+          levelFromGetLevelRange,
           `value ${val}: getLevel=${levelFromGetLevel}, getLevelRange=${levelFromGetLevelRange}`,
-        )
+        ).toBe(levelFromGetLevel)
       }
     })
   })
