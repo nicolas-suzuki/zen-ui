@@ -103,8 +103,10 @@ export function renderYearGraph(
           ${labels}
           ${calculateGridPositions(heatmapData.weeks.flat(), weekStart).map(
             ({ day, row, col }) => {
-              const color =
-                colorScale[day.level] ?? colorScale[colorScale.length - 1]
+              // Missing days are rendered with a subtle placeholder color
+              const color = day.missing
+                ? 'rgba(128, 128, 128, 0.02)'
+                : (colorScale[day.level] ?? colorScale[colorScale.length - 1])
               return svg`
                 <rect
                   width="${RECT_SIZE}"
@@ -113,7 +115,7 @@ export function renderYearGraph(
                   y="${row * STEP}"
                   fill="${color}"
                   style="cursor: pointer;"
-                  @mouseenter=${(e: MouseEvent) => context.onCellMouseEnter(e, day.date, day.count)}
+                  @mouseenter=${(e: MouseEvent) => context.onCellMouseEnter(e, day.date, day.count, day.missing)}
                   @mouseleave=${context.onCellMouseLeave}
                 />
               `

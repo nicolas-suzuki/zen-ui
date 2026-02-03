@@ -68,20 +68,24 @@ title: Activity
 
 <br>
 
-| Option            | Type     | Default      | Description                                                      |
-| ----------------- | -------- | ------------ | ---------------------------------------------------------------- |
-| `entity`          | string   | **Required** | Entity ID that contains your data                                |
-| `card`            | string   | **Required** | Card type: `heatmap`                                             |
-| `title`           | string   | —            | Card title displayed at the top                                  |
-| `attribute`       | string   | `data`       | Entity attribute containing the data array                       |
-| `range`           | string   | `rolling`    | `rolling` (last 365 days) or `year` (calendar years)             |
-| `years`           | number   | `1`          | Number of years to display (only for `range: year`)              |
-| `baseColor`       | string   | `#40c463`    | Base color for the heatmap (hex format)                          |
-| `backgroundColor` | string   | —            | Custom card background color                                     |
-| `levelCount`      | number   | `5`          | Number of intensity levels (2-10)                                |
-| `levelThresholds` | number[] | —            | Custom percentile thresholds (must have `levelCount - 1` values) |
-| `weekStartDay`    | string   | `monday`     | First day of week: `monday`, `mon`, `sunday`, or `sun`           |
-| `show_legend`     | boolean  | `true`       | Show the Less/More legend                                        |
+| Option            | Type     | Default      | Description                                                       |
+| ----------------- | -------- | ------------ | ----------------------------------------------------------------- |
+| `entity`          | string   | **Required** | Entity ID that contains your data                                 |
+| `card`            | string   | **Required** | Card type: `heatmap`                                              |
+| `title`           | string   | —            | Card title displayed at the top                                   |
+| `attribute`       | string   | `data`       | Entity attribute containing the data array                        |
+| `range`           | string   | `rolling`    | `rolling` (last 365 days) or `year` (calendar years)              |
+| `years`           | number   | `1`          | Number of years to display (only for `range: year`)               |
+| `baseColor`       | string   | `#40c463`    | Base color for the heatmap (hex format)                           |
+| `backgroundColor` | string   | —            | Custom card background color                                      |
+| `levelCount`      | number   | `5`          | Number of intensity levels (2-10)                                 |
+| `levelThresholds` | number[] | —            | Custom percentile thresholds (must have `levelCount - 1` values)  |
+| `weekStartDay`    | string   | `monday`     | First day of week: `monday`, `mon`, `sunday`, or `sun`            |
+| `valueMode`       | string   | `clamp_zero` | `clamp_zero` (negatives = 0) or `range` (levels span min..max)    |
+| `missingMode`     | string   | `zero`       | `zero` (missing = 0) or `transparent` (missing days are distinct) |
+| `show_legend`     | boolean  | `true`       | Show the Less/More legend                                         |
+
+> **Note:** When using `valueMode: range`, `missingMode` is automatically set to `transparent` because zero has meaning within the range.
 
 </details>
 
@@ -217,6 +221,36 @@ entity: sensor.habits
 title: Habit Tracker
 weekStartDay: sunday
 ```
+
+**Sparse Data with Transparent Missing Days**
+
+When your data is sparse and you want to distinguish between "no data" and "zero value":
+
+![Heatmap Missing Mode](images/heatmap-missing-mode.png)
+
+```yaml
+type: custom:zen-ui
+card: heatmap
+entity: sensor.sporadic_tracker
+title: Sporadic Events
+missingMode: transparent
+```
+
+With `missingMode: transparent`, days without any data appear transparent, while days with an explicit count of 0 still show the empty color. This is useful for sensors that don't report every day.
+
+**Range Mode for Positive/Negative Values**
+
+For data that includes negative values (like energy balance, temperature delta, profit/loss):
+
+```yaml
+type: custom:zen-ui
+card: heatmap
+entity: sensor.energy_balance
+title: Energy Balance
+valueMode: range
+```
+
+With `valueMode: range`, levels are distributed across the full min..max range. Negative values get lower levels, positive values get higher levels, and zero falls somewhere in the middle based on your data distribution. Missing days automatically appear transparent since zero has meaning in range mode.
 
 **HA Screenshot**
 

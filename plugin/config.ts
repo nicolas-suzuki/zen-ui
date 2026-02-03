@@ -14,6 +14,12 @@ export type WeekStartDay = 'sunday' | 'monday'
 // Card type - extend as new types are added
 export type CardType = 'heatmap'
 
+// Missing mode type
+export type MissingMode = 'zero' | 'transparent'
+
+// Value mode type
+export type ValueMode = 'clamp_zero' | 'range'
+
 // Default values
 export const CONFIG_DEFAULTS = {
   range: 'rolling' as const,
@@ -23,6 +29,8 @@ export const CONFIG_DEFAULTS = {
   baseColor: '#40c463',
   show_legend: true,
   attribute: 'data',
+  missingMode: 'zero' as MissingMode,
+  valueMode: 'clamp_zero' as ValueMode,
 } as const
 
 // Convert weekStartDay to pipeline format (0 = Sunday, 1 = Monday)
@@ -92,6 +100,18 @@ const LevelCountSchema = v.pipe(
   }),
 )
 
+// Schema for missingMode
+const MissingModeSchema = withFallback(
+  v.picklist(['zero', 'transparent']),
+  CONFIG_DEFAULTS.missingMode,
+)
+
+// Schema for valueMode
+const ValueModeSchema = withFallback(
+  v.picklist(['clamp_zero', 'range']),
+  CONFIG_DEFAULTS.valueMode,
+)
+
 // Schema for baseColor (hex color)
 const BaseColorSchema = v.pipe(
   v.unknown(),
@@ -134,6 +154,8 @@ const HeatmapConfigSchema = v.pipe(
     weekStartDay: v.optional(WeekStartDaySchema, CONFIG_DEFAULTS.weekStartDay),
     levelCount: v.optional(LevelCountSchema, CONFIG_DEFAULTS.levelCount),
     levelThresholds: v.optional(v.array(v.number())),
+    missingMode: v.optional(MissingModeSchema, CONFIG_DEFAULTS.missingMode),
+    valueMode: v.optional(ValueModeSchema, CONFIG_DEFAULTS.valueMode),
     baseColor: v.optional(BaseColorSchema, CONFIG_DEFAULTS.baseColor),
     backgroundColor: v.optional(v.string()),
     grid_options: GridOptionsSchema,

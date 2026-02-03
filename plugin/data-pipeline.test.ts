@@ -523,6 +523,22 @@ describe('getLevel', () => {
       expect(getLevel(85, 100, 10, customThresholds)).toBe(9)
     })
   })
+
+  describe('negative values (clamp_zero behavior)', () => {
+    it('negative count returns level 0 (treated as no activity)', () => {
+      expect(getLevel(-5, 100)).toBe(0)
+    })
+
+    it('negative count with various maxCount values returns level 0', () => {
+      expect(getLevel(-1, 10)).toBe(0)
+      expect(getLevel(-50, 100)).toBe(0)
+      expect(getLevel(-100, 100)).toBe(0)
+    })
+
+    it('negative count with maxCount=0 returns level 0', () => {
+      expect(getLevel(-5, 0)).toBe(0)
+    })
+  })
 })
 
 describe('boundDataToRange', () => {
@@ -949,6 +965,216 @@ describe('processHeatmapData', () => {
       expect(allDays.find((d) => d.date === '2024-01-15')?.level).toBe(2)
       expect(allDays.find((d) => d.date === '2024-01-16')?.level).toBe(1)
       expect(allDays.find((d) => d.date === '2024-01-17')?.level).toBe(2)
+    })
+  })
+
+  describe('value_mode: clamp_zero (default)', () => {
+    it('negative values are treated as level 0 by default', () => {
+      const config: PipelineConfig = { mode: 'fixed', years: 1 }
+      const rawData = [
+        { date: '2024-01-15', count: 100 }, // max (positive)
+        { date: '2024-01-16', count: -50 }, // negative → should be level 0
+        { date: '2024-01-17', count: -5 }, // negative → should be level 0
+        { date: '2024-01-18', count: 0 }, // zero → level 0
+        { date: '2024-01-19', count: 25 }, // 25% → level 1
+      ]
+      const result = processHeatmapData(config, rawData, date(2024, 6, 20))
+
+      const allDays = result[0].weeks.flat()
+      expect(allDays.find((d) => d.date === '2024-01-15')?.level).toBe(4) // max
+      expect(allDays.find((d) => d.date === '2024-01-16')?.level).toBe(0) // negative → 0
+      expect(allDays.find((d) => d.date === '2024-01-17')?.level).toBe(0) // negative → 0
+      expect(allDays.find((d) => d.date === '2024-01-18')?.level).toBe(0) // zero → 0
+      expect(allDays.find((d) => d.date === '2024-01-19')?.level).toBe(1) // 25%
+    })
+
+    it('explicit value_mode: clamp_zero treats negatives as level 0', () => {
+      const config: PipelineConfig = {
+        mode: 'fixed',
+        years: 1,
+        valueMode: 'clamp_zero',
+      }
+      const rawData = [
+        { date: '2024-01-15', count: 100 },
+        { date: '2024-01-16', count: -25 },
+      ]
+      const result = processHeatmapData(config, rawData, date(2024, 6, 20))
+
+      const allDays = result[0].weeks.flat()
+      expect(allDays.find((d) => d.date === '2024-01-16')?.level).toBe(0)
+    })
+
+    it('negative values do not affect maxCount calculation', () => {
+      const config: PipelineConfig = { mode: 'fixed', years: 1 }
+      const rawData = [
+        { date: '2024-01-15', count: -1000 }, // large negative should not affect max
+        { date: '2024-01-16', count: 10 }, // this should be the max
+        { date: '2024-01-17', count: 5 }, // 50% of max → level 2
+      ]
+      const result = processHeatmapData(config, rawData, date(2024, 6, 20))
+
+      expect(result[0].maxCount).toBe(10) // maxCount ignores negatives
+      const allDays = result[0].weeks.flat()
+      expect(allDays.find((d) => d.date === '2024-01-17')?.level).toBe(2) // 50%
+    })
+  })
+
+  describe('missingMode: transparent', () => {
+    it('default missingMode does not set missing flag', () => {
+      const config: PipelineConfig = { mode: 'fixed', years: 1 }
+      const rawData = [{ date: '2024-01-15', count: 5 }]
+      const result = processHeatmapData(config, rawData, date(2024, 6, 20))
+
+      const allDays = result[0].weeks.flat()
+      // With default mode, missing flag should be undefined
+      const missingDay = allDays.find((d) => d.date === '2024-01-10')
+      expect(missingDay?.missing).toBeUndefined()
+    })
+
+    it('missingMode: transparent marks days without data as missing', () => {
+      const config: PipelineConfig = {
+        mode: 'fixed',
+        years: 1,
+        missingMode: 'transparent',
+      }
+      const rawData = [
+        { date: '2024-01-15', count: 5 },
+        { date: '2024-01-16', count: 0 }, // explicit zero, NOT missing
+      ]
+      const result = processHeatmapData(config, rawData, date(2024, 6, 20))
+
+      const allDays = result[0].weeks.flat()
+
+      // Day with data (count > 0) - not missing
+      const dayWithData = allDays.find((d) => d.date === '2024-01-15')
+      expect(dayWithData?.missing).toBe(false)
+      expect(dayWithData?.count).toBe(5)
+
+      // Day with explicit zero - not missing
+      const dayWithZero = allDays.find((d) => d.date === '2024-01-16')
+      expect(dayWithZero?.missing).toBe(false)
+      expect(dayWithZero?.count).toBe(0)
+
+      // Day without any data - missing
+      const missingDay = allDays.find((d) => d.date === '2024-01-10')
+      expect(missingDay?.missing).toBe(true)
+      expect(missingDay?.count).toBe(0)
+      expect(missingDay?.level).toBe(0)
+    })
+
+    it('missingMode: zero (explicit) does not set missing flag', () => {
+      const config: PipelineConfig = {
+        mode: 'fixed',
+        years: 1,
+        missingMode: 'zero',
+      }
+      const rawData = [{ date: '2024-01-15', count: 5 }]
+      const result = processHeatmapData(config, rawData, date(2024, 6, 20))
+
+      const allDays = result[0].weeks.flat()
+      const missingDay = allDays.find((d) => d.date === '2024-01-10')
+      expect(missingDay?.missing).toBeUndefined()
+    })
+  })
+
+  describe('valueMode: range', () => {
+    it('distributes levels across min..max including negatives', () => {
+      const config: PipelineConfig = {
+        mode: 'fixed',
+        years: 1,
+        valueMode: 'range',
+      }
+      // Data from -10 to +10, so 0 is in the middle
+      const rawData = [
+        { date: '2024-01-10', count: -10 }, // min → level 0
+        { date: '2024-01-11', count: -5 }, // 25% → level 1
+        { date: '2024-01-12', count: 0 }, // 50% → level 2
+        { date: '2024-01-13', count: 5 }, // 75% → level 3
+        { date: '2024-01-14', count: 10 }, // max → level 4
+      ]
+      const result = processHeatmapData(config, rawData, date(2024, 6, 20))
+
+      const allDays = result[0].weeks.flat()
+      expect(allDays.find((d) => d.date === '2024-01-10')?.level).toBe(0) // min
+      expect(allDays.find((d) => d.date === '2024-01-11')?.level).toBe(1) // 25%
+      expect(allDays.find((d) => d.date === '2024-01-12')?.level).toBe(2) // 50% (zero)
+      expect(allDays.find((d) => d.date === '2024-01-13')?.level).toBe(3) // 75%
+      expect(allDays.find((d) => d.date === '2024-01-14')?.level).toBe(4) // max
+    })
+
+    it('forces missingMode to transparent (zero has meaning in range)', () => {
+      const config: PipelineConfig = {
+        mode: 'fixed',
+        years: 1,
+        valueMode: 'range',
+        missingMode: 'zero', // should be ignored, forced to transparent
+      }
+      const rawData = [
+        { date: '2024-01-15', count: 10 },
+        { date: '2024-01-16', count: -10 },
+      ]
+      const result = processHeatmapData(config, rawData, date(2024, 6, 20))
+
+      const allDays = result[0].weeks.flat()
+      // Missing days should have missing: true (transparent forced)
+      const missingDay = allDays.find((d) => d.date === '2024-01-10')
+      expect(missingDay?.missing).toBe(true)
+    })
+
+    it('handles all positive values (min > 0)', () => {
+      const config: PipelineConfig = {
+        mode: 'fixed',
+        years: 1,
+        valueMode: 'range',
+      }
+      // All positive: 5 to 15
+      const rawData = [
+        { date: '2024-01-10', count: 5 }, // min → level 0
+        { date: '2024-01-11', count: 10 }, // 50% → level 2
+        { date: '2024-01-12', count: 15 }, // max → level 4
+      ]
+      const result = processHeatmapData(config, rawData, date(2024, 6, 20))
+
+      const allDays = result[0].weeks.flat()
+      expect(allDays.find((d) => d.date === '2024-01-10')?.level).toBe(0) // min
+      expect(allDays.find((d) => d.date === '2024-01-11')?.level).toBe(2) // 50%
+      expect(allDays.find((d) => d.date === '2024-01-12')?.level).toBe(4) // max
+    })
+
+    it('handles all negative values (max < 0)', () => {
+      const config: PipelineConfig = {
+        mode: 'fixed',
+        years: 1,
+        valueMode: 'range',
+      }
+      // All negative: -15 to -5
+      const rawData = [
+        { date: '2024-01-10', count: -15 }, // min → level 0
+        { date: '2024-01-11', count: -10 }, // 50% → level 2
+        { date: '2024-01-12', count: -5 }, // max → level 4
+      ]
+      const result = processHeatmapData(config, rawData, date(2024, 6, 20))
+
+      const allDays = result[0].weeks.flat()
+      expect(allDays.find((d) => d.date === '2024-01-10')?.level).toBe(0) // min
+      expect(allDays.find((d) => d.date === '2024-01-11')?.level).toBe(2) // 50%
+      expect(allDays.find((d) => d.date === '2024-01-12')?.level).toBe(4) // max
+    })
+
+    it('tracks minCount in HeatmapData', () => {
+      const config: PipelineConfig = {
+        mode: 'fixed',
+        years: 1,
+        valueMode: 'range',
+      }
+      const rawData = [
+        { date: '2024-01-10', count: -20 },
+        { date: '2024-01-11', count: 30 },
+      ]
+      const result = processHeatmapData(config, rawData, date(2024, 6, 20))
+
+      expect(result[0].minCount).toBe(-20)
+      expect(result[0].maxCount).toBe(30)
     })
   })
 })
